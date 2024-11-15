@@ -42,8 +42,9 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
             let pushThisPlayerToBlack: boolean = false;
 
             if (Crit.Licenses && whitePlayer.IsLicenseReidar) { pushThisPlayerToBlack = true; }
+            if (Crit.Reidars && whitePlayer.IsReidar) { pushThisPlayerToBlack = true; }
 
-            if (pushThisPlayerToBlack == true && newBlack.length < desiredBlackCount) {
+            if (pushThisPlayerToBlack === true && newBlack.length < desiredBlackCount) {
                 newBlack.push(whitePlayer);
             }
             else {
@@ -93,8 +94,9 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
             let pushThisPlayerToWhite: boolean = true;
 
             if (Crit.Licenses && blackPlayer.IsLicenseReidar) { pushThisPlayerToWhite = false; }
+            if (Crit.Reidars && blackPlayer.IsReidar) { pushThisPlayerToWhite = false; }
 
-            if (pushThisPlayerToWhite == false && newWhite.length < desiredWhiteCount) {
+            if (pushThisPlayerToWhite === false && newWhite.length < desiredWhiteCount) {
                 newBlack.push(blackPlayer);
             }
             else {
@@ -161,7 +163,7 @@ export const GenerateRoster = (Crit: Criteria, PlayerPool: PlayerWithId[], Guest
         };
     });
 
-    if (!Crit.Licenses) {
+    if (!Crit.Licenses && !Crit.Reidars) {
         defensePool.forEach(function (player) {
             if (counter === false) {
                 RosterBase.Black.push(player);
@@ -189,6 +191,20 @@ export const GenerateRoster = (Crit: Criteria, PlayerPool: PlayerWithId[], Guest
         });
         forwardPool.forEach(function (player) {
             player.IsLicenseReidar ? RosterBase.Black.push(player) : RosterBase.White.push(player);
+        });
+
+        if (RosterBase.Black.length - RosterBase.White.length > 1 ||
+            RosterBase.White.length - RosterBase.Black.length > 0
+        ) {
+           RosterBase = BalanceRosters(Crit, RosterBase);
+        }
+    }
+    else if (Crit.Reidars === true) {
+        defensePool.forEach(function (player) {
+            player.IsReidar ? RosterBase.Black.push(player) : RosterBase.White.push(player);
+        });
+        forwardPool.forEach(function (player) {
+            player.IsReidar ? RosterBase.Black.push(player) : RosterBase.White.push(player);
         });
 
         if (RosterBase.Black.length - RosterBase.White.length > 1 ||

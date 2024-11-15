@@ -41,7 +41,7 @@ export const FormatCriteriaText = (Crit: Criteria) => {
     }
 
     if (Crit.Reidars) {
-        text = text + `Kaikki joskus-Reidarit ${InsertVerbOptions[GetRandomInt(InsertVerbOptions.length-1)]} mustille. `
+        text = text + `Kaikki LifeTime-Reidarit ${InsertVerbOptions[GetRandomInt(InsertVerbOptions.length-1)]} mustille. `
     }
 
     return text + affix;
