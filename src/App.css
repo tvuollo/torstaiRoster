@@ -1,0 +1,276 @@
+body {
+    background-attachment: fixed;
+    background-image: url('https://koti.org/reidars/kuvat/wallpapers/wallpaper-1280.jpg');
+    background-size: 600px 500px;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    background: yellow;
+    color: red;
+    font-size: 21px;
+    height: 30px;
+    left: 0;
+    line-height: 30px;
+    padding: 10px;
+    position: fixed;
+    text-shadow: 1px 1px 1px green;
+    top: 0px;
+}
+
+h2 {
+    margin-top: 10px;
+}
+
+button {
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+}
+
+thead th:first-of-type {
+    text-align: left;
+}
+
+tbody th {
+    text-align: left;
+}
+
+tbody td {
+    text-align: center;
+}
+
+table.table tbody th,
+table.table tbody td {
+    border-bottom: 1px solid #ccc;
+}
+
+table.table tbody tr:hover th,
+table.table tbody tr:hover td {
+    background-color: rgba(0, 0, 255, .25);
+}
+
+input[type="text"] {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+}
+
+/* ---------- */
+
+.back {
+    background: rgba(0, 0, 0, .25);
+    display: flex;
+    justify-content: space-between;
+    left: 0;
+    padding: 10px 20px;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.back button {
+    background: blue;
+    color: white;
+}
+
+.criteria {
+    display: block;
+    padding: 5px;
+}
+
+.criteria input {
+    height: 18px;
+    width: 18px;
+    margin-right: 10px;
+}
+
+.criteriatext {
+    background: rgba(255, 255, 255, .25);
+    color: #000099;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    padding: 10px;
+    text-shadow: 1px 1px 0 white, -1px 1px 0 white;
+}
+
+.generate {
+    background: lime;
+    border: none;
+    box-shadow: 0 0 0 0 rgba(255, 255, 0, 0), inset 0 0 0 0 rgba(0, 0, 0 ,0), inset 0 0 0 2px black;
+    color: #000;
+    display: block;
+    font-family: 'Comic Sans', Comic Sans, Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: 21px;
+    letter-spacing: 0em;
+    line-height: 24px;
+    margin: 40px auto;
+    padding: 14px;
+    position: relative;
+    text-shadow: 1px 1px 1px white, -1px -1px 1px white, 2px 2px 2px white, -2px -2px 2px white;
+    transition: all .5s ease-in-out;
+    width: 100%;
+}
+
+.generate[disabled] {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: scale(.9);
+}
+
+.generate:not([disabled]):after {
+    background: cyan;
+    bottom: 0;
+    content: '';
+    display: block;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: all .25s linear;
+}
+
+.generate:not([disabled]):hover,
+.generate:not([disabled]):focus {
+    background: blue;
+    box-shadow: 0 0 8px 8px rgba(255, 255, 0, .3), inset 0 0 0 2px black, inset 0 0 0 4px white;
+    color: white;
+    font-size: 28px;
+    letter-spacing: 0.1em;
+    line-height: 24px;
+    text-shadow: 1px 1px 1px black, -1px -1px 1px black, 20px 20px 20px rgba(255, 255, 255, 0), -20px -20px 20px rgba(255, 255, 255, 0);
+}
+
+.generate:not([disabled]):hover:after,
+.generate:not([disabled]):focus:after,
+.generate:not([disabled]):active:after {
+    background: cyan;
+    opacity: 1;
+    top: 100%;
+}
+
+.generate:not([disabled]):active {
+    background: black;
+    box-shadow: 0 0 16px 4px rgba(0, 0, 0, .3);
+    transition: all .1s linear;
+}
+
+/* ---------- */
+
+.app {
+    font-size: 13px;
+    min-height: 100vh;
+    padding-bottom: 60px;
+    padding-top: 60px;
+    position: relative;
+    z-index: 2;
+}
+
+.flex-item {
+    background: rgba(255,255,255,.8);
+    display: block;
+    filter: blur(1px);
+    left: 0;
+    margin: 0 20px 20px;
+    padding: 40px 20px;
+    position: absolute;
+    right: 0;
+    transform: rotate3d(52, -41, -11, 1turn) scale(0);
+    transform-origin: 50% 50%;
+    transform-style: preserve-3d;
+    transition: all 1s ease-in-out;
+    z-index: 1;
+}
+
+.app[data-active="1"] #step1,
+.app[data-active="2"] #step2,
+.app[data-active="3"] #step3,
+.app[data-active="4"] #step4 {
+    filter: none;
+    transform: rotate3d(0, 0, 0, 0turn) scale(1);
+    z-index: 2;
+}
+
+@media (min-width: 550px) {
+    .app {
+        font-size: 16px;
+    }
+
+    .roster-container {
+        display: flex;
+    }
+
+    .roster-container div {
+        flex: 1 0 50%;
+    }
+}
+
+@media (min-width: 1320px) {
+    #step4 {
+        display: block;
+        filter: blur(1px);
+        left: auto;
+        right: auto;
+        position: absolute !important;
+        transform: rotate3d(52, -41, -11, 1turn) scale(0);
+        width: 640px;
+    }
+
+    .app #step1,
+    .app #step2,
+    .app #step3 {
+        display: block;
+        filter: none;
+        transform: rotate3d(0, 0, 0, 0turn) scale(1);
+    }
+
+    .app[data-active="4"] #step1,
+    .app[data-active="4"] #step2,
+    .app[data-active="4"] #step3 {
+        filter: blur(1px);
+        transform: rotate3d(52, -41, -11, 1turn) scale(0);
+    }
+
+    .app[data-active="4"] #step4 {
+        filter: none;
+        transform: rotate3d(0, 0, 0, 0turn) scale(1);
+    }
+
+    .app #step1 .back,
+    .app #step2 .back,
+    .app #step3 .back {
+        display: none;   
+    }
+
+    .app[data-active="4"] #step4 {
+        display: block;   
+    }
+
+    .app {
+        align-items: start;
+        display: flex;
+        justify-content: center;
+    }
+
+    .flex-item {
+        border-right: 1px solid #ccc;
+        filter: initial;
+        flex: 0 0 calc(100% / 3 - 83px);
+        position: initial;
+        transform: initial;
+        transform-origin: 50% 50%;
+        transform-style: preserve-3d;
+        transition: all 1s ease-in-out;
+    }
+
+    .flex-item:last-child {
+        border-right: none;
+    }    
+}
+
+
