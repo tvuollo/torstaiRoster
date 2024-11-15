@@ -24,6 +24,7 @@ function App() {
         IsDefenseman: player.IsDefenseman,
         IsLicenseReidar: player.IsLicenseReidar,
         IsOriginalReidar: player.IsOriginalReidar,
+        IsPermaWhite: player.IsPermaWhite,
         IsReidar: player.IsReidar,
         Name: player.Name
       }
@@ -32,6 +33,17 @@ function App() {
     setPlayerPool(defaultPlayerPool);
 
     setCriteriaText(FormatCriteriaText(generationCriteria));
+
+    /* TEST SCRIPT */
+    /*
+    const testRosterPool: PlayerWithId[] = [];
+    defaultPlayerPool.forEach(function (player) {
+      if (testRosterPool.length < 20) {
+        testRosterPool.push(player);
+      }
+    });
+    setRosterPool(testRosterPool);
+    */
   }, []);
 
   const handlePoolPlayerClick = (Id: string) => {
@@ -291,7 +303,7 @@ function App() {
           Reidarit samalle puolelle
         </label>
         <hr />
-        <p className="criteriatext">{criteriaText}</p>
+        <p className="criteriatext">Puolustajat tasataan aina. {criteriaText}</p>
         <button className="generate" disabled={(rosterPool.length + guestPool.length) < 2} onClick={() => handleGenerateClick()}>TEE ROSTERIT</button>
         {(rosterPool.length + guestPool.length) < 2 && (<p style={{ color: "red", textAlign: "center" }}><strong>Lisää ensin vähintään kaksi (2) pelaajaa.</strong></p>)}
         <div className="back">
