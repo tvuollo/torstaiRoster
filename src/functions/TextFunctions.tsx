@@ -25,8 +25,8 @@ const TextAffixOptions: string[] = [
 ];
 
 export const FormatCriteriaText = (Crit: Criteria) => {   
-    if (!Crit.Licenses && !Crit.Ogs && !Crit.Reidars && !Crit.Whites) {
-        return "Rosterit arvotaan täysin sattumanvaraisesti.";
+    if (!Crit.Licenses && !Crit.Ogs && !Crit.Reidars ) {
+        return "Rosterit arvotaan muuten täysin sattumanvaraisesti.";
     }
 
     const affix = TextAffixOptions[GetRandomInt(TextAffixOptions.length-1)]

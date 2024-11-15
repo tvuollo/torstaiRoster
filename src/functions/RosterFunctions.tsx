@@ -31,29 +31,32 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
     let newBlack: PlayerWithId[] = [];
     let newWhite: PlayerWithId[] = [];
 
+    // If white has more
     if (isWhiteBigger) {
         newWhite = ShufflePool(newWhite);
         RosterBase.Black.forEach(function (blackPlayer) {
             newBlack.push(blackPlayer);
         });
+        // First go through criteria
         RosterBase.White.forEach(function (whitePlayer) {
             let pushThisPlayerToBlack: boolean = false;
 
             if (Crit.Licenses && whitePlayer.IsLicenseReidar) { pushThisPlayerToBlack = true; }
 
-            if (pushThisPlayerToBlack == true && newBlack.length < RosterBase.White.length) {
+            if (pushThisPlayerToBlack == true && newBlack.length < desiredBlackCount) {
                 newBlack.push(whitePlayer);
             }
             else {
                 newWhite.push(whitePlayer);
             }
         });
+        // Even out defense first
         if (newBlack.length < desiredBlackCount) {
             let blackDefenseCount = newBlack.filter((obj) => obj.IsDefenseman === true).length;
             let evenNewerWhite: PlayerWithId[] = [];
 
             newWhite.forEach(function (whitePlayer) {
-                if (blackDefenseCount < 3 && whitePlayer.IsDefenseman && newBlack.length < desiredBlackCount && whitePlayer.IsPermaWhite === undefined) {
+                if (blackDefenseCount < 3 && whitePlayer.IsDefenseman && newBlack.length < desiredBlackCount && whitePlayer.IsPermaWhite !== true) {
                     newBlack.push(whitePlayer);
                     blackDefenseCount++;
                 }
@@ -64,11 +67,12 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
 
             newWhite = evenNewerWhite;
         }
+        // Finish with forwards
         if (newBlack.length < desiredBlackCount) {
             let evenNewerWhite: PlayerWithId[] = [];
 
             newWhite.forEach(function (whitePlayer) {
-                if (newBlack.length < desiredBlackCount && whitePlayer.IsPermaWhite === undefined) {
+                if (newBlack.length < desiredBlackCount && whitePlayer.IsPermaWhite !== true) {
                     newBlack.push(whitePlayer);
                 }
                 else {
@@ -79,15 +83,13 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
             newWhite = evenNewerWhite;
         }
     }
+    // If black has more
     else {
-        console.log("too many blacks");
-        newBlack = ShufflePool(newBlack);
-        console.log(newBlack);
         RosterBase.White.forEach(function (whitePlayer) {
             newWhite.push(whitePlayer);
         });
+        // Go through criteria first
         RosterBase.Black.forEach(function (blackPlayer) {
-            console.log("first iteration");
             let pushThisPlayerToWhite: boolean = true;
 
             if (Crit.Licenses && blackPlayer.IsLicenseReidar) { pushThisPlayerToWhite = false; }
@@ -96,20 +98,17 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
                 newBlack.push(blackPlayer);
             }
             else {
-                console.log("push " + blackPlayer.Name);
                 newWhite.push(blackPlayer);
             }
         });
+        // Even out defense first
         if (newWhite.length < desiredWhiteCount) {
-            console.log("second iteration");
             let whiteDefenseCount = newWhite.filter((obj) => obj.IsDefenseman === true).length;
             let evenNewerBlack: PlayerWithId[] = [];
 
             newBlack.forEach(function (blackPlayer) {
                 if (whiteDefenseCount < 3 && blackPlayer.IsDefenseman && newWhite.length < desiredWhiteCount) {
                     newWhite.push(blackPlayer);
-                    console.log(whiteDefenseCount);
-                    console.log("push " + blackPlayer.Name);
                     whiteDefenseCount++;
                 }
                 else {
@@ -119,11 +118,12 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
 
             newBlack = evenNewerBlack;
         }
+        // Finish with forwards
         if (newWhite.length < desiredWhiteCount) {
             let evenNewerBlack: PlayerWithId[] = [];
 
             newBlack.forEach(function (blackPlayer) {
-                if (newWhite.length < desiredWhiteCount) {
+                if (blackPlayer.IsDefenseman == false && newWhite.length < desiredWhiteCount) {
                     newWhite.push(blackPlayer);
                 }
                 else {
@@ -143,7 +143,8 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
 
 export const GenerateRoster = (Crit: Criteria, PlayerPool: PlayerWithId[], GuestPool: PlayerWithId[]) => {
     let counter: boolean = false;
-    const shuffledPool = ShufflePool(PlayerPool.concat(GuestPool));
+    const poolToShuffle = PlayerPool.concat(GuestPool);
+    const shuffledPool = ShufflePool(poolToShuffle);
     const defensePool: PlayerWithId[] = [];
     const forwardPool: PlayerWithId[] = [];
     let RosterBase: Rosters = {
