@@ -56,7 +56,7 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
             let evenNewerWhite: PlayerWithId[] = [];
 
             newWhite.forEach(function (whitePlayer) {
-                if (blackDefenseCount < 3 && whitePlayer.IsDefenseman && newBlack.length < desiredBlackCount && whitePlayer.IsPermaWhite !== true) {
+                if (blackDefenseCount < 3 && whitePlayer.IsDefenseman && newBlack.length < desiredBlackCount && !whitePlayer.IsPermaWhite) {
                     newBlack.push(whitePlayer);
                     blackDefenseCount++;
                 }
@@ -72,7 +72,7 @@ const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
             let evenNewerWhite: PlayerWithId[] = [];
 
             newWhite.forEach(function (whitePlayer) {
-                if (newBlack.length < desiredBlackCount && whitePlayer.IsPermaWhite !== true) {
+                if (newBlack.length < desiredBlackCount && whitePlayer.IsDefenseman === false && !whitePlayer.IsPermaWhite) {
                     newBlack.push(whitePlayer);
                 }
                 else {
@@ -194,7 +194,7 @@ export const GenerateRoster = (Crit: Criteria, PlayerPool: PlayerWithId[], Guest
         if (RosterBase.Black.length - RosterBase.White.length > 1 ||
             RosterBase.White.length - RosterBase.Black.length > 0
         ) {
-            RosterBase = BalanceRosters(Crit, RosterBase);
+           RosterBase = BalanceRosters(Crit, RosterBase);
         }
     }
 

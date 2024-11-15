@@ -12,7 +12,7 @@ function App() {
   const [playerPool, setPlayerPool] = useState<PlayerWithId[]>([]);
   const [rosterPool, setRosterPool] = useState<PlayerWithId[]>([]);
   const [guestPool, setGuestPool] = useState<PlayerWithId[]>([]);
-  const [generationCriteria, setGenerationCriteria] = useState<Criteria>({ Licenses: false, Ogs: false, Reidars: false, Whites: false });
+  const [generationCriteria, setGenerationCriteria] = useState<Criteria>({ Licenses: false, Ogs: false, Reidars: false });
   const [criteriaText, setCriteriaText] = useState<string>("");
   const [generatedRosters, setGeneratedRosters] = useState<Rosters | null>(null);
 
@@ -35,7 +35,7 @@ function App() {
     setCriteriaText(FormatCriteriaText(generationCriteria));
 
     /* TEST SCRIPT */
-    /*
+    
     const testRosterPool: PlayerWithId[] = [];
     defaultPlayerPool.forEach(function (player) {
       if (testRosterPool.length < 20) {
@@ -43,7 +43,7 @@ function App() {
       }
     });
     setRosterPool(testRosterPool);
-    */
+    
   }, []);
 
   const handlePoolPlayerClick = (Id: string) => {
@@ -61,6 +61,7 @@ function App() {
             IsDefenseman: player.IsDefenseman,
             IsLicenseReidar: player.IsLicenseReidar,
             IsOriginalReidar: player.IsOriginalReidar,
+            IsPermaWhite: player.IsPermaWhite,
             IsReidar: player.IsReidar,
             Name: player.Name
           }
@@ -99,6 +100,7 @@ function App() {
             IsDefenseman: player.IsDefenseman,
             IsLicenseReidar: player.IsLicenseReidar,
             IsOriginalReidar: player.IsOriginalReidar,
+            IsPermaWhite: player.IsPermaWhite,
             IsReidar: player.IsReidar,
             Name: player.Name
           }
@@ -123,6 +125,7 @@ function App() {
       IsDefenseman: false,
       IsLicenseReidar: false,
       IsOriginalReidar: false,
+      IsPermaWhite: false,
       IsReidar: false,
       Name: ""
     };
@@ -140,6 +143,7 @@ function App() {
         IsDefenseman: player.Id === Id ? !player.IsDefenseman : player.IsDefenseman,
         IsLicenseReidar: player.IsLicenseReidar,
         IsOriginalReidar: player.IsOriginalReidar,
+        IsPermaWhite: player.IsPermaWhite,
         IsReidar: player.IsReidar,
         Name: player.Name
       }
@@ -158,6 +162,7 @@ function App() {
         IsDefenseman: player.IsDefenseman,
         IsLicenseReidar: player.IsLicenseReidar,
         IsOriginalReidar: player.IsOriginalReidar,
+        IsPermaWhite: player.IsPermaWhite,
         IsReidar: player.IsReidar,
         Name: player.Id === Id ? SetName : player.Name
       }
@@ -177,6 +182,7 @@ function App() {
           IsDefenseman: player.IsDefenseman,
           IsLicenseReidar: player.IsLicenseReidar,
           IsOriginalReidar: player.IsOriginalReidar,
+          IsPermaWhite: player.IsPermaWhite,
           IsReidar: player.IsReidar,
           Name: player.Id
         }
@@ -195,7 +201,6 @@ function App() {
       Licenses: Input === "Licenses" ? Value : (generationCriteria !== null ? generationCriteria.Licenses : false),
       Ogs: Input === "Ogs" ? Value : (generationCriteria !== null ? generationCriteria.Ogs : false),
       Reidars: Input === "Reidars" ? Value : (generationCriteria !== null ? generationCriteria.Reidars : false),
-      Whites: Input === "Whites" ? Value : (generationCriteria !== null ? generationCriteria.Whites : false),
     };
 
     setGenerationCriteria(updatedCriteria);
@@ -341,6 +346,9 @@ function App() {
       </div>
 
       <h1 style={{transform: "rotateZ(-2deg)"}}>Torstai Roster <small><strong><i><u>BETA</u></i></strong></small></h1>
+      {rosterPool.length + guestPool.length > 0 && activeStep < 4 &&
+        <p className="counter">{rosterPool.length + guestPool.length}</p>      
+      }
     </div>
   )
 }

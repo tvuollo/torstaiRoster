@@ -5,6 +5,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Aki S"
     },
@@ -12,6 +13,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: true,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Aleksi B"
     },
@@ -19,6 +21,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Aleksi K"
     },
@@ -26,6 +29,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Arto Ra"
     },
@@ -33,6 +37,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Eetu K"
     },
@@ -40,6 +45,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Henri R"
     },
@@ -47,6 +53,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Iiro K"
     },
@@ -54,6 +61,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Iisakki M"
     },
@@ -61,6 +69,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: true,
         IsOriginalReidar: true,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Ilkka K"
     },
@@ -68,6 +77,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: false,
         Name: "Janne P"
     },
@@ -75,6 +85,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Jari K"
     },
@@ -82,6 +93,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: true,
         IsOriginalReidar: true,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Jari M"
     },
@@ -89,6 +101,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Jason K"
     },
@@ -96,6 +109,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: false,
         Name: "Jesse O"
     },
@@ -103,6 +117,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Joonas J"
     },
@@ -118,6 +133,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Juha T"
     },
@@ -125,6 +141,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Kalle I"
     },
@@ -132,6 +149,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: false,
         IsOriginalReidar: true,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Mikko L"
     },
@@ -139,6 +157,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Mikko R"
     },
@@ -146,6 +165,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: false,
         Name: "Niko A"
     },
@@ -153,6 +173,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Olli H"
     },
@@ -160,6 +181,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Olli-Pekka M"
     },
@@ -167,6 +189,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: false,
         Name: "Pertti H"
     },
@@ -174,6 +197,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Peter M"
     },
@@ -181,6 +205,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Petro R"
     },
@@ -188,6 +213,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Ryan O"
     },
@@ -195,6 +221,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: false,
         Name: "Sami S"
     },
@@ -202,6 +229,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: true,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Samu L"
     },
@@ -209,6 +237,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: false,
         Name: "Tapio L"
     },
@@ -216,6 +245,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: false,
         Name: "Teemu L"
     },
@@ -223,6 +253,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Tomi S"
     },
@@ -230,6 +261,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: true,
         IsOriginalReidar: true,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Tuomas V"
     },
@@ -237,6 +269,7 @@ export const Players: Player[] = [
         IsDefenseman: false,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: true,
         Name: "Ville H"
     },
@@ -244,6 +277,7 @@ export const Players: Player[] = [
         IsDefenseman: true,
         IsLicenseReidar: false,
         IsOriginalReidar: false,
+        IsPermaWhite: false,
         IsReidar: false,
         Name: "Wiljam A"
     },

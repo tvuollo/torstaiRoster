@@ -2,7 +2,7 @@ export interface Player {
     IsDefenseman: boolean;
     IsLicenseReidar: boolean;
     IsOriginalReidar: boolean;
-    IsPermaWhite?: boolean;
+    IsPermaWhite: boolean;
     IsReidar: boolean;
     Name: string;
 }
