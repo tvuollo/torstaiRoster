@@ -35,7 +35,7 @@ function App() {
     setCriteriaText(FormatCriteriaText(generationCriteria));
 
     /* TEST SCRIPT */
-    
+    /*
     const testRosterPool: PlayerWithId[] = [];
     defaultPlayerPool.forEach(function (player) {
       if (testRosterPool.length < 20) {
@@ -43,7 +43,7 @@ function App() {
       }
     });
     setRosterPool(testRosterPool);
-    
+    */
   }, []);
 
   const handlePoolPlayerClick = (Id: string) => {
@@ -303,7 +303,7 @@ function App() {
           <input id="reidars" name="Licenses" type="checkbox" onChange={(e) => handleCriteriaChange(e)} />
           Lisenssireidarit samalle puolelle
         </label>
-        <label className="criteria" style={{ display: "none" }}>
+        <label className="criteria">
           <input id="reidars" name="Reidars" type="checkbox" onChange={(e) => handleCriteriaChange(e)} />
           Reidarit samalle puolelle
         </label>
@@ -345,7 +345,7 @@ function App() {
         </div>
       </div>
 
-      <h1 style={{transform: "rotateZ(-2deg)"}}>Torstai Roster <small><strong><i><u>BETA</u></i></strong></small></h1>
+      <h1 style={{transform: "rotateZ(-2deg)"}}>Torstai Roster <small><strong><i><u>BETA</u></i></strong></small><small><strong style={{color: "black"}}>0.1</strong></small></h1>
       {rosterPool.length + guestPool.length > 0 && activeStep < 4 &&
         <p className="counter">{rosterPool.length + guestPool.length}</p>      
       }
