@@ -1,0 +1,527 @@
+[
+  {
+    "Id": "aki-s",
+    "Name": "Aki S",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "aleksi-b",
+    "Name": "Aleksi B",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "aleksi-k",
+    "Name": "Aleksi K",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "arto-ra",
+    "Name": "Arto Ra",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "eetu-k",
+    "Name": "Eetu K",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "henri-r",
+    "Name": "Henri R",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "iiro-k",
+    "Name": "Iiro K",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "iisakki-m",
+    "Name": "Iisakki M",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "ilkka-k",
+    "Name": "Ilkka K",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "janne-p",
+    "Name": "Janne P",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": false,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "jari-k",
+    "Name": "Jari K",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "jari-m",
+    "Name": "Jari M",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "jason-k",
+    "Name": "Jason K",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "jesse-o",
+    "Name": "Jesse O",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": false,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "joonas-j",
+    "Name": "Joonas J",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "jori-p",
+    "Name": "Jori P",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": false,
+    "IsPermaWhite": true,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "juha-t",
+    "Name": "Juha T",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "kalle-i",
+    "Name": "Kalle I",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "mikko-l",
+    "Name": "Mikko L",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "mikko-r",
+    "Name": "Mikko R",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "niko-a",
+    "Name": "Niko A",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": false,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "olli-h",
+    "Name": "Olli H",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "olli-pekka-m",
+    "Name": "Olli-Pekka M",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "pertti-h",
+    "Name": "Pertti H",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": false,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "peter-m",
+    "Name": "Peter M",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "petro-r",
+    "Name": "Petro R",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "ryan-o",
+    "Name": "Ryan O",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "sami-s",
+    "Name": "Sami S",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": false,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "samu-l",
+    "Name": "Samu L",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "tapio-l",
+    "Name": "Tapio L",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": false,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "teemu-l",
+    "Name": "Teemu L",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": false,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "tomi-s",
+    "Name": "Tomi S",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "tuomas-v",
+    "Name": "Tuomas V",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "ville-h",
+    "Name": "Ville H",
+    "Aliases": [],
+    "Position": "F",
+    "IsReidar": true,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  },
+  {
+    "Id": "wiljam-a",
+    "Name": "Wiljam A",
+    "Aliases": [],
+    "Position": "D",
+    "IsReidar": false,
+    "IsPermaWhite": false,
+    "Ratings": {
+      "Offense": 2,
+      "Defense": 2,
+      "Speed": 2,
+      "Skill": 2,
+      "Grit": 2
+    }
+  }
+]

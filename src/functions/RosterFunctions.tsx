@@ -1,221 +1,128 @@
-import { PlayerWithId } from "../types/Player";
+import { RatingKeys, SignedUpPlayer } from "../types/Player";
 import { Criteria } from "../types/Criteria";
 import { Rosters } from "../types/Rosters";
 
-const ShufflePool = (Pool: PlayerWithId[]) => {
-    const shuffledPool = Pool
-        .map(Id => ({ Id, sort: Math.random() }))
-        .sort((a, b) => a.sort - b.sort)
-        .map(({ Id }) => Id);
-    return shuffledPool;
-};
+// How much each imbalance costs. Ratings are 1-3, so a weight of 1 per rating point.
+const TotalRatingWeight = 2;
+const DefenseWeight = 3;
+const ReidarWeight = 10;
+const Restarts = 200;
+// Any split this close to the best one found is good enough; one of them is picked at random.
+const CostTolerance = 1;
 
-const SortPool = function (a: PlayerWithId, b: PlayerWithId) {
-    if (a.Name === undefined || b.Name === undefined) {
-        return 0;
-    }
-    if (a.Name < b.Name) {
-        return -1;
-    }
-    if (a.Name > b.Name) {
-        return 1;
-    }
-    return 0;
-};
+export interface TeamStats {
+    Both: number;
+    Defense: number;
+    Forwards: number;
+    Reidars: number;
+}
 
-const BalanceRosters = (Crit: Criteria, RosterBase: Rosters) => {
-    let balancedRosters = RosterBase;
-    const isWhiteBigger = RosterBase.White.length > RosterBase.Black.length;
-    const desiredBlackCount = (Math.round((RosterBase.Black.length + RosterBase.White.length) / 2));
-    const desiredWhiteCount = desiredBlackCount || desiredBlackCount - 1;
-    let newBlack: PlayerWithId[] = [];
-    let newWhite: PlayerWithId[] = [];
+const SortByName = (a: SignedUpPlayer, b: SignedUpPlayer) => a.Name.localeCompare(b.Name, "fi");
 
-    // If white has more
-    if (isWhiteBigger) {
-        newWhite = ShufflePool(newWhite);
-        RosterBase.Black.forEach(function (blackPlayer) {
-            newBlack.push(blackPlayer);
+const Shuffle = <T,>(Items: T[], Random: () => number) => Items
+    .map(item => ({ item, sort: Random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ item }) => item);
+
+export const GetTeamStats = (Team: SignedUpPlayer[]): TeamStats => ({
+    Both: Team.filter(player => player.Position === "B").length,
+    Defense: Team.filter(player => player.Position === "D").length,
+    Forwards: Team.filter(player => player.Position === "F").length,
+    Reidars: Team.filter(player => player.IsReidar).length
+});
+
+// IsBlack[i] tells which team Pool[i] is on.
+const GetCost = (Crit: Criteria, Pool: SignedUpPlayer[], IsBlack: boolean[], BlackSize: number) => {
+    const ratingDiff: Record<string, number> = {};
+    let totalDiff = 0;
+    let defenseDiff = 0;
+    let blackReidars = 0;
+    let whiteReidars = 0;
+
+    Pool.forEach(function (player, i) {
+        const sign = IsBlack[i] ? 1 : -1;
+        RatingKeys.forEach(function (key) {
+            ratingDiff[key] = (ratingDiff[key] ?? 0) + sign * player.Ratings[key];
+            totalDiff += sign * player.Ratings[key];
         });
-        // First go through criteria
-        RosterBase.White.forEach(function (whitePlayer) {
-            let pushThisPlayerToBlack: boolean = false;
-
-            if (Crit.Licenses && whitePlayer.IsLicenseReidar) { pushThisPlayerToBlack = true; }
-            if (Crit.Reidars && whitePlayer.IsReidar) { pushThisPlayerToBlack = true; }
-
-            if (pushThisPlayerToBlack === true && newBlack.length < desiredBlackCount) {
-                newBlack.push(whitePlayer);
-            }
-            else {
-                newWhite.push(whitePlayer);
-            }
-        });
-        // Even out defense first
-        if (newBlack.length < desiredBlackCount) {
-            let blackDefenseCount = newBlack.filter((obj) => obj.IsDefenseman === true).length;
-            let evenNewerWhite: PlayerWithId[] = [];
-
-            newWhite.forEach(function (whitePlayer) {
-                if (blackDefenseCount < 3 && whitePlayer.IsDefenseman && newBlack.length < desiredBlackCount && !whitePlayer.IsPermaWhite) {
-                    newBlack.push(whitePlayer);
-                    blackDefenseCount++;
-                }
-                else {
-                    evenNewerWhite.push(whitePlayer);
-                }
-            });
-
-            newWhite = evenNewerWhite;
+        // A player who plays both counts as half a defenseman.
+        defenseDiff += sign * (player.Position === "D" ? 1 : player.Position === "B" ? 0.5 : 0);
+        if (player.IsReidar && IsBlack[i]) {
+            blackReidars++;
         }
-        // Finish with forwards
-        if (newBlack.length < desiredBlackCount) {
-            let evenNewerWhite: PlayerWithId[] = [];
-
-            newWhite.forEach(function (whitePlayer) {
-                if (newBlack.length < desiredBlackCount && whitePlayer.IsDefenseman === false && !whitePlayer.IsPermaWhite) {
-                    newBlack.push(whitePlayer);
-                }
-                else {
-                    evenNewerWhite.push(whitePlayer);
-                }
-            });
-
-            newWhite = evenNewerWhite;
+        else if (player.IsReidar) {
+            whiteReidars++;
         }
-    }
-    // If black has more
-    else {
-        RosterBase.White.forEach(function (whitePlayer) {
-            newWhite.push(whitePlayer);
-        });
-        // Go through criteria first
-        RosterBase.Black.forEach(function (blackPlayer) {
-            let pushThisPlayerToWhite: boolean = true;
-
-            if (Crit.Licenses && blackPlayer.IsLicenseReidar) { pushThisPlayerToWhite = false; }
-            if (Crit.Reidars && blackPlayer.IsReidar) { pushThisPlayerToWhite = false; }
-
-            if (pushThisPlayerToWhite === false && newWhite.length < desiredWhiteCount) {
-                newBlack.push(blackPlayer);
-            }
-            else {
-                newWhite.push(blackPlayer);
-            }
-        });
-        // Even out defense first
-        if (newWhite.length < desiredWhiteCount) {
-            let whiteDefenseCount = newWhite.filter((obj) => obj.IsDefenseman === true).length;
-            let evenNewerBlack: PlayerWithId[] = [];
-
-            newBlack.forEach(function (blackPlayer) {
-                if (whiteDefenseCount < 3 && blackPlayer.IsDefenseman && newWhite.length < desiredWhiteCount) {
-                    newWhite.push(blackPlayer);
-                    whiteDefenseCount++;
-                }
-                else {
-                    evenNewerBlack.push(blackPlayer);
-                }
-            });
-
-            newBlack = evenNewerBlack;
-        }
-        // Finish with forwards
-        if (newWhite.length < desiredWhiteCount) {
-            let evenNewerBlack: PlayerWithId[] = [];
-
-            newBlack.forEach(function (blackPlayer) {
-                if (blackPlayer.IsDefenseman == false && newWhite.length < desiredWhiteCount) {
-                    newWhite.push(blackPlayer);
-                }
-                else {
-                    evenNewerBlack.push(blackPlayer);
-                }
-            });
-
-            newBlack = evenNewerBlack;
-        }
-    }
-
-    balancedRosters.Black = newBlack;
-    balancedRosters.White = newWhite;
-
-    return balancedRosters;
-};
-
-export const GenerateRoster = (Crit: Criteria, PlayerPool: PlayerWithId[], GuestPool: PlayerWithId[]) => {
-    let counter: boolean = false;
-    const poolToShuffle = PlayerPool.concat(GuestPool);
-    const shuffledPool = ShufflePool(poolToShuffle);
-    const defensePool: PlayerWithId[] = [];
-    const forwardPool: PlayerWithId[] = [];
-    let RosterBase: Rosters = {
-        Black: [],
-        White: []
-    };
-
-    shuffledPool.forEach(function (player) {
-        if (player.IsDefenseman) {
-            defensePool.push(player);
-        }
-        else {
-            forwardPool.push(player);
-        };
     });
 
-    if (!Crit.Licenses && !Crit.Reidars) {
-        defensePool.forEach(function (player) {
-            if (counter === false) {
-                RosterBase.Black.push(player);
-            }
-            else {
-                RosterBase.White.push(player);
-            }
-            counter = !counter;
-        });
+    let cost = RatingKeys.reduce((sum, key) => sum + Math.abs(ratingDiff[key]), 0)
+        + TotalRatingWeight * Math.abs(totalDiff)
+        + DefenseWeight * Math.abs(defenseDiff);
 
-        forwardPool.forEach(function (player) {
-            if (counter === false) {
-                RosterBase.Black.push(player);
-            }
-            else {
-                RosterBase.White.push(player);
-            }
-            counter = !counter;
-        });
+    if (Crit.ReidarMode === "even") {
+        cost += ReidarWeight * Math.abs(blackReidars - whiteReidars);
+    }
+    else if (Crit.ReidarMode === "black") {
+        const reidarsThatFit = Math.min(blackReidars + whiteReidars, BlackSize);
+        cost += ReidarWeight * (reidarsThatFit - blackReidars);
     }
 
-    if (Crit.Licenses === true) {
-        defensePool.forEach(function (player) {
-            player.IsLicenseReidar ? RosterBase.Black.push(player) : RosterBase.White.push(player);
-        });
-        forwardPool.forEach(function (player) {
-            player.IsLicenseReidar ? RosterBase.Black.push(player) : RosterBase.White.push(player);
-        });
+    return cost;
+};
 
-        if (RosterBase.Black.length - RosterBase.White.length > 1 ||
-            RosterBase.White.length - RosterBase.Black.length > 0
-        ) {
-           RosterBase = BalanceRosters(Crit, RosterBase);
+export const GenerateRoster = (Crit: Criteria, Pool: SignedUpPlayer[], Random: () => number = Math.random): Rosters => {
+    const blackSize = Math.ceil(Pool.length / 2);
+    const whiteSize = Pool.length - blackSize;
+    // Perma-whites are locked to white, as long as there is room.
+    const lockedWhite = new Set(Pool.map((_, i) => i).filter(i => Pool[i].IsPermaWhite).slice(0, whiteSize));
+    const candidates: { Cost: number; IsBlack: boolean[] }[] = [];
+    const seen = new Set<string>();
+    let bestCost = Infinity;
+
+    for (let restart = 0; restart < Restarts; restart++) {
+        const free = Shuffle(Pool.map((_, i) => i).filter(i => !lockedWhite.has(i)), Random);
+        const isBlack = Pool.map(() => false);
+        free.slice(0, blackSize).forEach(i => { isBlack[i] = true; });
+        let cost = GetCost(Crit, Pool, isBlack, blackSize);
+
+        // Swap a black and a white player whenever it helps, until no swap does.
+        let improved = true;
+        while (improved) {
+            improved = false;
+            const blacks = Shuffle(Pool.map((_, i) => i).filter(i => isBlack[i]), Random);
+            const whites = Shuffle(Pool.map((_, i) => i).filter(i => !isBlack[i] && !lockedWhite.has(i)), Random);
+            for (const b of blacks) {
+                for (const w of whites) {
+                    isBlack[b] = false;
+                    isBlack[w] = true;
+                    const swappedCost = GetCost(Crit, Pool, isBlack, blackSize);
+                    if (swappedCost < cost) {
+                        cost = swappedCost;
+                        improved = true;
+                        break;
+                    }
+                    isBlack[b] = true;
+                    isBlack[w] = false;
+                }
+                if (improved) {
+                    break;
+                }
+            }
+        }
+
+        const key = isBlack.map(value => value ? "1" : "0").join("");
+        if (!seen.has(key)) {
+            seen.add(key);
+            candidates.push({ Cost: cost, IsBlack: isBlack });
+            bestCost = Math.min(bestCost, cost);
         }
     }
-    else if (Crit.Reidars === true) {
-        defensePool.forEach(function (player) {
-            player.IsReidar ? RosterBase.Black.push(player) : RosterBase.White.push(player);
-        });
-        forwardPool.forEach(function (player) {
-            player.IsReidar ? RosterBase.Black.push(player) : RosterBase.White.push(player);
-        });
 
-        if (RosterBase.Black.length - RosterBase.White.length > 1 ||
-            RosterBase.White.length - RosterBase.Black.length > 0
-        ) {
-           RosterBase = BalanceRosters(Crit, RosterBase);
-        }
-    }
+    const goodEnough = candidates.filter(candidate => candidate.Cost <= bestCost + CostTolerance);
+    const chosen = goodEnough[Math.floor(Random() * goodEnough.length)];
 
-    RosterBase.Black.sort(SortPool);
-    RosterBase.White.sort(SortPool);
-
-    return RosterBase;
+    return {
+        Black: Pool.filter((_, i) => chosen.IsBlack[i]).sort(SortByName),
+        White: Pool.filter((_, i) => !chosen.IsBlack[i]).sort(SortByName)
+    };
 };

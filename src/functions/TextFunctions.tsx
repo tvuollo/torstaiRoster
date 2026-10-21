@@ -1,4 +1,6 @@
 import { Criteria } from "../types/Criteria";
+import { Rosters } from "../types/Rosters";
+import { SignedUpPlayer } from "../types/Player";
 import { GetRandomInt } from "./NumberFunctions";
 
 const InsertVerbOptions: string[] = [
@@ -24,25 +26,30 @@ const TextAffixOptions: string[] = [
     "Säädetään kopissa loput."
 ];
 
-export const FormatCriteriaText = (Crit: Criteria) => {   
-    if (!Crit.Licenses && !Crit.Ogs && !Crit.Reidars ) {
-        return "Rosterit arvotaan muuten täysin sattumanvaraisesti.";
+const PickOne = (Options: string[]) => Options[GetRandomInt(Options.length)];
+
+export const FormatCriteriaText = (Crit: Criteria) => {
+    if (Crit.ReidarMode === "ignore") {
+        return "Reidareista ei välitetä. " + PickOne(TextAffixOptions);
     }
 
-    const affix = TextAffixOptions[GetRandomInt(TextAffixOptions.length-1)]
-    let text = "";
-
-    if (Crit.Ogs) {
-        text = text + `Kaikki Original Reidarit ${InsertVerbOptions[GetRandomInt(InsertVerbOptions.length-1)]} mustille. `
+    if (Crit.ReidarMode === "even") {
+        return `Reidarit ${PickOne(InsertVerbOptions)} tasan molemmille puolille. ` + PickOne(TextAffixOptions);
     }
 
-    if (Crit.Licenses) {
-        text = text + `Kaikki lisenssirosterissa olevat Reidarit ${InsertVerbOptions[GetRandomInt(InsertVerbOptions.length-1)]} mustille. `
-    }
+    return `Kaikki Reidarit ${PickOne(InsertVerbOptions)} mustille. ` + PickOne(TextAffixOptions);
+};
 
-    if (Crit.Reidars) {
-        text = text + `Kaikki LifeTime-Reidarit ${InsertVerbOptions[GetRandomInt(InsertVerbOptions.length-1)]} mustille. `
-    }
+export const PositionLabel = (Player: SignedUpPlayer) => Player.Position === "B" ? "F/D" : Player.Position;
 
-    return text + affix;
+// Plain text for pasting into Nimenhuuto or WhatsApp.
+export const FormatRostersText = (Generated: Rosters, Goalies: string[]) => {
+    const team = (Title: string, Players: SignedUpPlayer[]) =>
+        `${Title} (${Players.length})\n` + Players.map(player => `${player.Name} (${PositionLabel(player)})`).join("\n");
+
+    let text = team("MUSTA", Generated.Black) + "\n\n" + team("VALKOINEN", Generated.White);
+    if (Goalies.length > 0) {
+        text += `\n\nMV: ${Goalies.join(", ")}`;
+    }
+    return text;
 };

@@ -290,3 +290,87 @@ input[type="text"] {
 }
 
 
+
+/* ---------- */
+
+.paste {
+    box-sizing: border-box;
+    font-size: 16px;
+    width: 100%;
+}
+
+.parse,
+.result-tools button {
+    font-size: 16px;
+    margin: 10px 10px 10px 0;
+    padding: 6px 16px;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
+
+.guest-tools {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: 4px;
+}
+
+.guest-tools button {
+    font-size: 11px;
+}
+
+table.table tbody tr.unsure th,
+table.table tbody tr.unsure td {
+    background: rgba(255, 255, 0, .5);
+}
+
+table.table tbody tr.goalie th,
+table.table tbody tr.goalie td {
+    color: #888;
+    text-decoration: line-through;
+}
+
+button.active {
+    background: blue;
+    color: white;
+}
+
+.legend,
+.team-stats {
+    font-size: 12px;
+}
+
+.admin {
+    background: rgba(255, 255, 255, .9);
+    margin: 0 auto;
+    max-width: 1100px;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.admin-tools {
+    align-items: center;
+    background: yellow;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.admin-tools .save:not([disabled]) {
+    background: lime;
+    font-weight: bold;
+}
+
+.admin-table {
+    overflow-x: auto;
+}
+
+.admin-table input[type="text"] {
+    min-width: 110px;
+}
