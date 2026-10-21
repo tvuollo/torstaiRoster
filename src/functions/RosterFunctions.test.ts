@@ -45,6 +45,11 @@ describe("ParseSignups", () => {
         expect(byText["Sami H"]).toMatchObject({ PlayerId: null, Match: "none" });
     });
 
+    test("doesn't read the next player's first name as an initial", () => {
+        const entries = ParseSignups("Tuomas Ville Hyötylä", Players);
+        expect(entries.map(entry => [entry.Text, entry.PlayerId])).toEqual([["Tuomas", "tuomas-v"], ["Ville Hyötylä", "ville-h"]]);
+    });
+
     test("uses aliases and treats line breaks as name boundaries", () => {
         const players: Player[] = [{ ...Players[0], Aliases: ["Akke"] }];
         const entries = ParseSignups("Akke Pekka Koskinen\nVinkka\nKoskinen", players);

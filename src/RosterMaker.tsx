@@ -1,40 +1,40 @@
-import { useEffect, useState } from 'react';
-import { Criteria, ReidarMode } from './types/Criteria';
+import { KeyboardEvent, useEffect, useMemo, useState } from 'react';
+import { ReidarMode } from './types/Criteria';
 import { Player, Position, SignedUpPlayer } from './types/Player';
 import { Rosters } from './types/Rosters';
-import { Signup } from './types/Signup';
+import { EmptyCorrections, Signup, SignupCorrections, SignupOverride } from './types/Signup';
 import { FetchPlayers } from './functions/ApiFunctions';
-import { ParseSignups } from './functions/ParseFunctions';
+import { BuildSignups, SignupKey } from './functions/SignupFunctions';
 import { GenerateRoster, GetTeamStats } from './functions/RosterFunctions';
 import { FormatCriteriaText, FormatRostersText, PositionLabel } from './functions/TextFunctions';
+import { LoadStored, SaveStored } from './functions/StorageFunctions';
 
-const NextPosition: Record<Position, Position> = { F: "D", D: "B", B: "F" };
 const PositionText: Record<Position, string> = { F: "F", D: "D", B: "F/D" };
+// Line-up order on the team cards: defense first, then two-way players, then forwards.
+const PositionOrder: Record<Position, number> = { D: 0, B: 1, F: 2 };
 const LevelText: Record<number, string> = { 1: "Aloittelija", 2: "Perus", 3: "Kova" };
+const ReidarModes: { Mode: ReidarMode, Label: string }[] = [
+  { Mode: "ignore", Label: "Ei väliä" },
+  { Mode: "even", Label: "Tasan" },
+  { Mode: "black", Label: "Kaikki mustiin" }
+];
 
-let keyCounter = 0;
-const NewKey = () => `row-${++keyCounter}`;
-
-const NewSignup = (Text: string, PlayerId: string | null = null): Signup => ({
-  GuestLevel: 2,
-  GuestPosition: "F",
-  IsGoalie: false,
-  Key: NewKey(),
-  Match: PlayerId === null ? "none" : "exact",
-  PlayerId: PlayerId,
-  Text: Text
-});
+interface Result {
+  Comment: string;
+  Goalies: string[];
+  Rosters: Rosters;
+  Signature: string;
+}
 
 function RosterMaker() {
-  const [activeStep, setActiveStep] = useState<number>(1);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loadError, setLoadError] = useState<string>("");
-  const [pasteText, setPasteText] = useState<string>("");
-  const [signups, setSignups] = useState<Signup[]>([]);
-  const [generationCriteria, setGenerationCriteria] = useState<Criteria>({ ReidarMode: "ignore" });
-  const [criteriaText, setCriteriaText] = useState<string>(FormatCriteriaText({ ReidarMode: "ignore" }));
-  const [generatedRosters, setGeneratedRosters] = useState<Rosters | null>(null);
-  const [copied, setCopied] = useState<boolean>(false);
+  const [text, setText] = useState<string>(() => LoadStored("torstai-paste", ""));
+  const [corrections, setCorrections] = useState<SignupCorrections>(() => LoadStored("torstai-corrections", EmptyCorrections));
+  const [selected, setSelected] = useState<string | null>(null);
+  const [reidarMode, setReidarMode] = useState<ReidarMode>(() => LoadStored("torstai-reidar-mode", "ignore"));
+  const [result, setResult] = useState<Result | null>(null);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
 
   useEffect(() => {
     FetchPlayers()
@@ -42,62 +42,18 @@ function RosterMaker() {
       .catch((error: Error) => setLoadError(error.message));
   }, []);
 
-  const playerById = new Map(players.map(player => [player.Id, player]));
+  useEffect(() => SaveStored("torstai-paste", text), [text]);
+  useEffect(() => SaveStored("torstai-corrections", corrections), [corrections]);
+  useEffect(() => SaveStored("torstai-reidar-mode", reidarMode), [reidarMode]);
+
+  const playerById = useMemo(() => new Map(players.map(player => [player.Id, player])), [players]);
+  const signups = useMemo(() => BuildSignups(text, players, corrections), [text, players, corrections]);
   const skaters = signups.filter(signup => !signup.IsGoalie);
   const goalies = signups.filter(signup => signup.IsGoalie);
-  const signedUpIds = new Set(signups.map(signup => signup.PlayerId).filter(id => id !== null));
-  const unsignedPlayers = players.filter(player => !signedUpIds.has(player.Id));
-
-  const updateSignup = (Key: string, Changes: Partial<Signup>) => {
-    setSignups(signups.map(signup => signup.Key === Key ? { ...signup, ...Changes } : signup));
-  };
-
-  const handleParseClick = () => {
-    const seen = new Set<string>();
-    const parsed: Signup[] = [];
-    ParseSignups(pasteText, players).forEach(function (entry) {
-      // The same regular twice in the paste counts once.
-      if (entry.PlayerId !== null && seen.has(entry.PlayerId)) {
-        return;
-      }
-      if (entry.PlayerId !== null) {
-        seen.add(entry.PlayerId);
-      }
-      parsed.push({ ...NewSignup(entry.Text, entry.PlayerId), IsGoalie: entry.IsGoalie, Match: entry.Match });
-    });
-    setSignups(parsed);
-    setActiveStep(2);
-  };
-
-  const handlePoolPlayerClick = (Player: Player) => {
-    setSignups([...signups, NewSignup(Player.Name, Player.Id)]);
-  };
-
-  const handleMatchChange = (Key: string, PlayerId: string) => {
-    updateSignup(Key, { PlayerId: PlayerId === "" ? null : PlayerId, Match: PlayerId === "" ? "none" : "exact" });
-  };
-
-  // Joins a guest with the row below it, for names the paste split in two.
-  const handleMergeClick = (Index: number) => {
-    const next = signups[Index + 1];
-    const merged = { ...signups[Index], Text: `${signups[Index].Text} ${next.Text}`, PlayerId: null, Match: "none" as const };
-    setSignups([...signups.slice(0, Index), merged, ...signups.slice(Index + 2)]);
-  };
-
-  // Splits a guest at the last space, for names the paste joined together.
-  const handleSplitClick = (Index: number) => {
-    const signup = signups[Index];
-    const at = signup.Text.lastIndexOf(" ");
-    const first = { ...signup, Text: signup.Text.slice(0, at) };
-    const second = NewSignup(signup.Text.slice(at + 1));
-    setSignups([...signups.slice(0, Index), first, second, ...signups.slice(Index + 1)]);
-  };
-
-  const handleCriteriaChange = (Mode: ReidarMode) => {
-    const updatedCriteria: Criteria = { ReidarMode: Mode };
-    setGenerationCriteria(updatedCriteria);
-    setCriteriaText(FormatCriteriaText(updatedCriteria));
-  };
+  const guestCount = skaters.filter(signup => signup.PlayerId === null).length;
+  const unsureCount = signups.filter(signup => signup.Match === "firstname" || signup.Match === "initial").length;
+  const selectedIndex = signups.findIndex(signup => SignupKey(signup.Text) === selected);
+  const selectedSignup = selectedIndex >= 0 ? signups[selectedIndex] : null;
 
   const ToSignedUpPlayer = (Signup: Signup): SignedUpPlayer => {
     const player = Signup.PlayerId !== null ? playerById.get(Signup.PlayerId) : undefined;
@@ -117,187 +73,256 @@ function RosterMaker() {
     };
   };
 
-  const handleGenerateClick = () => {
-    setActiveStep(4);
-    setCopied(false);
-    setGeneratedRosters(GenerateRoster(generationCriteria, skaters.map(ToSignedUpPlayer)));
+  const pool = skaters.map(ToSignedUpPlayer);
+  const signature = JSON.stringify([reidarMode, pool.map(player => [player.Id, player.Name, player.Position, player.Ratings.Skill])]);
+
+  const setOverride = (Signup: Signup, Changes: SignupOverride) => {
+    const key = SignupKey(Signup.Text);
+    setCorrections({
+      ...corrections,
+      Overrides: { ...corrections.Overrides, [key]: { ...corrections.Overrides[key], ...Changes } }
+    });
   };
 
-  const handleCopyClick = () => {
-    if (generatedRosters === null) {
+  const handleSplit = (Signup: Signup) => {
+    const key = SignupKey(Signup.Text);
+    setCorrections({
+      ...corrections,
+      Merges: corrections.Merges.filter(merge => merge !== key),
+      Splits: [...corrections.Splits, key]
+    });
+    setSelected(null);
+  };
+
+  const handleMerge = (Index: number) => {
+    const key = SignupKey(`${signups[Index].Text} ${signups[Index + 1].Text}`);
+    setCorrections({
+      ...corrections,
+      Merges: [...corrections.Merges, key],
+      Splits: corrections.Splits.filter(split => split !== key)
+    });
+    setSelected(key);
+  };
+
+  const handleGenerate = () => {
+    if (pool.length < 2) {
       return;
     }
-    navigator.clipboard.writeText(FormatRostersText(generatedRosters, goalies.map(goalie => goalie.Text)))
-      .then(() => setCopied(true))
-      .catch(() => setCopied(false));
+    setCopyState("idle");
+    setResult({
+      Comment: FormatCriteriaText({ ReidarMode: reidarMode }),
+      Goalies: goalies.map(goalie => goalie.PlayerId !== null ? playerById.get(goalie.PlayerId)?.Name ?? goalie.Text : goalie.Text),
+      Rosters: GenerateRoster({ ReidarMode: reidarMode }, pool),
+      Signature: signature
+    });
   };
 
-  const RenderTeam = (Title: string, Team: SignedUpPlayer[], Black: boolean) => {
+  const handleKeyDown = (Event: KeyboardEvent) => {
+    if (Event.key === "Enter" && (Event.ctrlKey || Event.metaKey)) {
+      Event.preventDefault();
+      handleGenerate();
+    }
+    if (Event.key === "Escape") {
+      setSelected(null);
+    }
+  };
+
+  const resultText = result !== null ? FormatRostersText(result.Rosters, result.Goalies) : "";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(resultText)
+      .then(() => setCopyState("copied"))
+      .catch(() => setCopyState("failed"));
+  };
+
+  const ChipName = (Signup: Signup) => {
+    const player = Signup.PlayerId !== null ? playerById.get(Signup.PlayerId) : undefined;
+    return player?.Name ?? Signup.Text;
+  };
+
+  const ChipPosition = (Signup: Signup) => {
+    const player = Signup.PlayerId !== null ? playerById.get(Signup.PlayerId) : undefined;
+    return PositionText[player?.Position ?? Signup.GuestPosition];
+  };
+
+  const ChipKind = (Signup: Signup) => {
+    if (Signup.IsGoalie) {
+      return "goalie";
+    }
+    if (Signup.PlayerId === null) {
+      return "guest";
+    }
+    return Signup.Match === "exact" ? "known" : "unsure";
+  };
+
+  const RenderTeam = (Title: string, Team: SignedUpPlayer[], Color: "black" | "white") => {
     const stats = GetTeamStats(Team);
     return (
-      <div>
-        <h3 style={{ background: Black ? "black" : "white", color: Black ? "white" : "black", fontSize: 18, lineHeight: "18px", marginTop: 40, padding: 10 }}>{Title} <small>({Team.length})</small></h3>
-        <p className="team-stats">F {stats.Forwards} · D {stats.Defense}{stats.Both > 0 ? ` · F/D ${stats.Both}` : ""} · Reidarit {stats.Reidars}</p>
-        <ul>
-          {Team.map(player => (
-            <li key={player.Id}>{player.Name} <small>({PositionLabel(player)}){player.IsGuest ? " vieras" : ""}</small></li>
+      <article className={`team team-${Color}`}>
+        <header>
+          <h3>{Title}</h3>
+          <span className="team-count">{Team.length}</span>
+        </header>
+        <p className="team-stats">
+          {stats.Forwards} F · {stats.Defense} D{stats.Both > 0 ? ` · ${stats.Both} F/D` : ""} · {stats.Reidars} Reidaria
+        </p>
+        <ol>
+          {[...Team].sort((a, b) => PositionOrder[a.Position] - PositionOrder[b.Position] || a.Name.localeCompare(b.Name, "fi")).map(player => (
+            <li key={player.Id}>
+              <span>{player.Name}{player.IsGuest && <em> vieras</em>}</span>
+              <span className="pos">{PositionLabel(player)}</span>
+            </li>
           ))}
-        </ul>
-      </div>
+        </ol>
+      </article>
     );
   };
 
   return (
-    <div className="app" data-active={activeStep}>
-      <div className='flex-item' id="step1" data-active={activeStep === 1}>
-        <h2>Liitä ilmoittautuneet</h2>
-        <p>Kopioi nimet Nimenhuudon tapahtumasta ja liitä tähän. (MV) merkityt jätetään joukkueista pois.</p>
-        <textarea className="paste" rows={6} value={pasteText} onChange={(e) => setPasteText(e.target.value)} placeholder="Tuomas Peter M Sakke K Jussi L (MV) ..." />
-        <button className="parse" disabled={pasteText.trim() === "" || players.length === 0} onClick={() => handleParseClick()}>Tunnista nimet</button>
-        {loadError !== "" && <p className="error">{loadError}</p>}
-        <h2>Tai lisää käsin</h2>
-        <table className="table table1">
-          <thead>
-            <tr>
-              <th>Nimi</th>
-              <th>Pelipaikka</th>
-              <th>Reidar</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {unsignedPlayers.map((player) => (
-              <tr key={player.Id} id={`pool-${player.Id}`}>
-                <th>{player.Name}</th>
-                <td>{PositionText[player.Position]}</td>
-                <td style={{ color: "blue" }}>{player.IsReidar ? "X" : ""}</td>
-                <td>
-                  <button onClick={() => handlePoolPlayerClick(player)} style={{ marginLeft: 20 }}>+</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p><a href="#admin">Ylläpito</a></p>
-        <div className="back">
-          <div />
-          <button type="button" onClick={() => setActiveStep(2)}>Jatka ({skaters.length}) &rsaquo;</button>
-        </div>
-      </div>
+    <div className="page" onKeyDown={handleKeyDown}>
+      <header className="topbar">
+        <h1>Torstai<span>Roster</span></h1>
+        <a href="#admin">Ylläpito</a>
+      </header>
 
-      <div className='flex-item' id="step2" data-active={activeStep === 2}>
-        <h2>Ilmoittautuneet ({skaters.length})</h2>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Nimi</th>
-              <th>Pelaaja</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {signups.map((signup, index) => {
-              const isGuest = signup.PlayerId === null;
-              const isUnsure = signup.Match === "firstname" || signup.Match === "initial";
-              return (
-                <tr key={signup.Key} className={signup.IsGoalie ? "goalie" : isUnsure ? "unsure" : ""}>
-                  <th>
-                    {isGuest
-                      ? <input type="text" value={signup.Text} onChange={(e) => updateSignup(signup.Key, { Text: e.target.value })} />
-                      : signup.Text}
-                    {isGuest && !signup.IsGoalie && (
-                      <span className="guest-tools">
-                        <button title="Jaa kahdeksi" disabled={!signup.Text.includes(" ")} onClick={() => handleSplitClick(index)}>Jaa</button>
-                        <button title="Yhdistä seuraavaan" disabled={index === signups.length - 1} onClick={() => handleMergeClick(index)}>Yhdistä &darr;</button>
-                      </span>
-                    )}
-                  </th>
-                  <td>
-                    <select value={signup.PlayerId ?? ""} onChange={(e) => handleMatchChange(signup.Key, e.target.value)}>
-                      <option value="">Vieras</option>
-                      {players.map(player => (
-                        <option key={player.Id} value={player.Id}>{player.Name}</option>
+      <main className="layout">
+        <section className="panel">
+          <div className="panel-head">
+            <h2>Ilmoittautuneet</h2>
+            <span className="tally">{skaters.length} pelaajaa{goalies.length > 0 ? ` + ${goalies.length} MV` : ""}</span>
+          </div>
+
+          <label className="label" htmlFor="paste">Liitä nimet Nimenhuudosta</label>
+          <textarea
+            id="paste"
+            className="paste"
+            rows={5}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Tuomas Peter M Sakke K Jussi L (MV) ..."
+            spellCheck={false}
+          />
+          {loadError !== "" && <p className="error">{loadError}</p>}
+
+          {signups.length > 0 && (
+            <>
+              <ul className="chips" aria-label="Tunnistetut nimet">
+                {signups.map(signup => {
+                  const key = SignupKey(signup.Text);
+                  const kind = ChipKind(signup);
+                  return (
+                    <li key={signup.Key}>
+                      <button
+                        type="button"
+                        className={`chip chip-${kind}`}
+                        aria-pressed={selected === key}
+                        title={signup.Text}
+                        onClick={() => setSelected(selected === key ? null : key)}
+                      >
+                        {kind === "unsure" && <span className="chip-flag">?</span>}
+                        <span>{ChipName(signup)}</span>
+                        <span className="chip-pos">{kind === "goalie" ? "MV" : ChipPosition(signup)}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="hint">
+                {guestCount > 0 && <span className="hint-guest">{guestCount} vierasta</span>}
+                {unsureCount > 0 && <span className="hint-unsure">{unsureCount} arvattu, tarkista</span>}
+                <span>Napauta nimeä korjataksesi.</span>
+              </p>
+            </>
+          )}
+
+          {selectedSignup !== null && (
+            <div className="editor">
+              <div className="editor-head">
+                <strong>{selectedSignup.Text}</strong>
+                <button type="button" className="ghost" onClick={() => setSelected(null)}>Sulje</button>
+              </div>
+
+              <label className="field">
+                <span>Pelaaja</span>
+                <select value={selectedSignup.PlayerId ?? ""} onChange={(e) => setOverride(selectedSignup, { PlayerId: e.target.value === "" ? null : e.target.value })}>
+                  <option value="">Vieras</option>
+                  {players.map(player => <option key={player.Id} value={player.Id}>{player.Name}</option>)}
+                </select>
+                {(selectedSignup.Match === "firstname" || selectedSignup.Match === "initial") && (
+                  <button type="button" className="confirm" onClick={() => setOverride(selectedSignup, { PlayerId: selectedSignup.PlayerId })}>Oikein</button>
+                )}
+              </label>
+
+              {selectedSignup.PlayerId === null && !selectedSignup.IsGoalie && (
+                <>
+                  <div className="field">
+                    <span>Paikka</span>
+                    <div className="segmented">
+                      {(["F", "D", "B"] as Position[]).map(position => (
+                        <button key={position} type="button" aria-pressed={selectedSignup.GuestPosition === position} onClick={() => setOverride(selectedSignup, { Position: position })}>{PositionText[position]}</button>
                       ))}
-                    </select>
-                    {isGuest && !signup.IsGoalie && (
-                      <span className="guest-tools">
-                        <button title="Pelipaikka" onClick={() => updateSignup(signup.Key, { GuestPosition: NextPosition[signup.GuestPosition] })}>{PositionText[signup.GuestPosition]}</button>
-                        <select title="Taso" value={signup.GuestLevel} onChange={(e) => updateSignup(signup.Key, { GuestLevel: Number(e.target.value) })}>
-                          {[1, 2, 3].map(level => <option key={level} value={level}>{LevelText[level]}</option>)}
-                        </select>
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <button title="Maalivahti" className={signup.IsGoalie ? "active" : ""} onClick={() => updateSignup(signup.Key, { IsGoalie: !signup.IsGoalie })}>MV</button>
-                    <button onClick={() => setSignups(signups.filter(row => row.Key !== signup.Key))}>X</button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={3}>
-                <button onClick={() => setSignups([...signups, NewSignup("")])} style={{ marginTop: 10, padding: "4px 16px" }}>Lisää vieras</button>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-        <p className="legend">Keltaiset arvattiin nimen perusteella, tarkista ne. MV-merkityt eivät ole joukkueissa.</p>
-        <div className="back">
-          <button type="button" onClick={() => setActiveStep(1)}>&lsaquo; Takaisin</button>
-          <button type="button" onClick={() => setActiveStep(3)}>Jatka ({skaters.length}) &rsaquo;</button>
-        </div>
-      </div>
+                    </div>
+                  </div>
+                  <div className="field">
+                    <span>Taso</span>
+                    <div className="segmented">
+                      {[1, 2, 3].map(level => (
+                        <button key={level} type="button" aria-pressed={selectedSignup.GuestLevel === level} onClick={() => setOverride(selectedSignup, { Level: level })}>{LevelText[level]}</button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
-      <div className='flex-item' id="step3" data-active={activeStep === 3}>
-        <h2>Arvo rosterit <small>({skaters.length} pelaajaa)</small></h2>
-        <label className="criteria">
-          <input name="ReidarMode" type="radio" checked={generationCriteria.ReidarMode === "ignore"} onChange={() => handleCriteriaChange("ignore")} />
-          Reidareilla ei väliä
-        </label>
-        <label className="criteria">
-          <input name="ReidarMode" type="radio" checked={generationCriteria.ReidarMode === "even"} onChange={() => handleCriteriaChange("even")} />
-          Reidarit tasan molemmille puolille
-        </label>
-        <label className="criteria">
-          <input name="ReidarMode" type="radio" checked={generationCriteria.ReidarMode === "black"} onChange={() => handleCriteriaChange("black")} />
-          Reidarit samalle puolelle (musta)
-        </label>
-        <hr />
-        <p className="criteriatext">Puolustajat ja pelaajien taidot tasataan aina. {criteriaText}</p>
-        <button className="generate" disabled={skaters.length < 2} onClick={() => handleGenerateClick()}>TEE ROSTERIT</button>
-        {skaters.length < 2 && (<p style={{ color: "red", textAlign: "center" }}><strong>Lisää ensin vähintään kaksi (2) pelaajaa.</strong></p>)}
-        <div className="back">
-          <button type="button" onClick={() => setActiveStep(2)}>&lsaquo; Takaisin</button>
-        </div>
-      </div>
-
-      <div className="flex-item" id="step4">
-        <h2>Rosterit ({skaters.length} pelaajaa)</h2>
-        {generatedRosters !== null && (
-          <>
-            <div className="roster-container">
-              {RenderTeam("Musta", generatedRosters.Black, true)}
-              {RenderTeam("Valkoinen", generatedRosters.White, false)}
+              <div className="editor-actions">
+                <button type="button" aria-pressed={selectedSignup.IsGoalie} onClick={() => setOverride(selectedSignup, { IsGoalie: !selectedSignup.IsGoalie })}>Maalivahti</button>
+                {selectedSignup.Text.includes(" ") && <button type="button" onClick={() => handleSplit(selectedSignup)}>Jaa kahdeksi</button>}
+                {selectedIndex < signups.length - 1 && <button type="button" onClick={() => handleMerge(selectedIndex)}>Yhdistä seuraavaan ({signups[selectedIndex + 1].Text})</button>}
+              </div>
             </div>
-            {goalies.length > 0 && <p><strong>MV:</strong> {goalies.map(goalie => goalie.Text).join(", ")}</p>}
-            <div className="result-tools">
-              <button onClick={() => handleGenerateClick()}>Arvo uudelleen</button>
-              <button onClick={() => handleCopyClick()}>{copied ? "Kopioitu!" : "Kopioi tekstinä"}</button>
-            </div>
-          </>
-        )}
-        <div className="back">
-          <button type="button" onClick={() => setActiveStep(3)}>&lsaquo; Takaisin</button>
-        </div>
-      </div>
+          )}
+        </section>
 
-      <h1 style={{transform: "rotateZ(-2deg)"}}>Torstai Roster <small><strong><i><u>BETA</u></i></strong></small><small><strong style={{color: "black"}}>0.2</strong></small></h1>
-      {skaters.length > 0 && activeStep < 4 &&
-        <p className="counter">{skaters.length}</p>
-      }
+        <section className="panel">
+          <div className="panel-head">
+            <h2>Rosterit</h2>
+          </div>
+
+          <div className="field">
+            <span>Reidarit</span>
+            <div className="segmented">
+              {ReidarModes.map(option => (
+                <button key={option.Mode} type="button" aria-pressed={reidarMode === option.Mode} onClick={() => setReidarMode(option.Mode)}>{option.Label}</button>
+              ))}
+            </div>
+          </div>
+
+          <button type="button" className="generate" disabled={pool.length < 2} onClick={() => handleGenerate()}>
+            {result === null ? "Tee rosterit" : "Arvo uudelleen"}
+            <kbd>Ctrl + Enter</kbd>
+          </button>
+
+          {result === null && (
+            <p className="empty">Liitä ilmoittautuneet ja paina <strong>Tee rosterit</strong>. Joukkueet tasataan pelipaikkojen, taitojen ja Reidar-valinnan mukaan.</p>
+          )}
+
+          {result !== null && (
+            <>
+              {result.Signature !== signature && <p className="stale">Lista on muuttunut. Arvo rosterit uudelleen.</p>}
+              <div className="teams">
+                {RenderTeam("Musta", result.Rosters.Black, "black")}
+                {RenderTeam("Valkoinen", result.Rosters.White, "white")}
+              </div>
+              <p className="comment">{result.Comment}</p>
+              {result.Goalies.length > 0 && <p className="goalies"><strong>MV</strong> {result.Goalies.join(", ")}</p>}
+              <button type="button" className="copy" onClick={() => handleCopy()}>{copyState === "copied" ? "Kopioitu" : "Kopioi tekstinä"}</button>
+              {copyState === "failed" && (
+                <textarea className="copy-fallback" readOnly rows={8} value={resultText} onFocus={(e) => e.target.select()} autoFocus aria-label="Rosterit tekstinä" />
+              )}
+            </>
+          )}
+        </section>
+      </main>
     </div>
   )
 }

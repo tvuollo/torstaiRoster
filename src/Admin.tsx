@@ -25,6 +25,7 @@ function Admin() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
     FetchIsAdmin().then(setIsAdmin).catch(() => setIsAdmin(false));
@@ -69,6 +70,7 @@ function Admin() {
       Ratings: { Offense: 2, Defense: 2, Speed: 2, Skill: 2, Grit: 2 }
     };
     setPlayers([newPlayer, ...players]);
+    setSearch("");
     setIsDirty(true);
   };
 
@@ -85,81 +87,102 @@ function Admin() {
       .catch((error: Error) => setMessage(error.message));
   };
 
+  const query = search.trim().toLowerCase();
+  const visiblePlayers = query === ""
+    ? players
+    : players.filter(player => [player.Name, ...player.Aliases].some(name => name.toLowerCase().includes(query)));
+
   if (isAdmin === null) {
-    return <div className="admin"><p>Ladataan...</p></div>;
+    return <div className="page"><p className="empty">Ladataan...</p></div>;
   }
 
   if (!isAdmin) {
     return (
-      <div className="admin">
-        <h2>Ylläpito</h2>
-        <form onSubmit={handleLogin}>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Salasana" autoFocus />
-          <button type="submit">Kirjaudu</button>
-        </form>
-        {message !== "" && <p className="error">{message}</p>}
-        <p><a href="#">&lsaquo; Takaisin rostereihin</a></p>
+      <div className="page">
+        <header className="topbar">
+          <h1>Torstai<span>Roster</span></h1>
+          <a href="#">Rosterit</a>
+        </header>
+        <main className="login">
+          <form className="panel" onSubmit={handleLogin}>
+            <h2>Ylläpito</h2>
+            <label className="label" htmlFor="password">Salasana</label>
+            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus />
+            <button type="submit" className="generate">Kirjaudu</button>
+            {message !== "" && <p className="error">{message}</p>}
+          </form>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="admin">
-      <div className="admin-tools">
-        <a href="#">&lsaquo; Rosterit</a>
-        <button onClick={() => handleAddClick()}>Lisää pelaaja</button>
-        <button className="save" disabled={!isDirty} onClick={() => handleSaveClick()}>Tallenna</button>
-        <button onClick={() => handleLogout()}>Kirjaudu ulos</button>
-        <span>{isDirty ? "Tallentamattomia muutoksia" : message}</span>
+    <div className="page">
+      <header className="topbar">
+        <h1>Torstai<span>Roster</span></h1>
+        <a href="#">Rosterit</a>
+      </header>
+      <div className="admin-bar">
+        <input id="search" type="search" placeholder="Etsi pelaajaa" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Etsi pelaajaa" />
+        <button type="button" onClick={() => handleAddClick()}>Lisää pelaaja</button>
+        <button type="button" className="save" disabled={!isDirty} onClick={() => handleSaveClick()}>Tallenna</button>
+        <span className={isDirty ? "status status-dirty" : "status"}>{isDirty ? "Tallentamattomia muutoksia" : message}</span>
+        <button type="button" className="ghost" onClick={() => handleLogout()}>Kirjaudu ulos</button>
       </div>
-      <h2>Pelaajat ({players.length})</h2>
-      <p>Taidot 1-3. Muut nimet: pilkulla erotettuna ne muodot, joilla pelaaja näkyy Nimenhuudossa (esim. "Tuomas, Tumppi").</p>
-      <div className="admin-table">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Nimi</th>
-              <th>Muut nimet</th>
-              <th>Paikka</th>
-              <th>Reidar</th>
-              <th title="Pelaa aina valkoisissa">Aina valk.</th>
-              {RatingKeys.map(key => <th key={key}>{RatingText[key]}</th>)}
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {players.map(player => (
-              <tr key={player.Id}>
-                <th><input type="text" value={player.Name} placeholder="Nimi kuten Nimenhuudossa" onChange={(e) => updatePlayer(player.Id, { Name: e.target.value })} /></th>
-                <td>
-                  <input
-                    type="text"
-                    defaultValue={player.Aliases.join(", ")}
-                    onBlur={(e) => updatePlayer(player.Id, { Aliases: e.target.value.split(",").map(alias => alias.trim()).filter(alias => alias !== "") })}
-                  />
-                </td>
-                <td>
-                  <select value={player.Position} onChange={(e) => updatePlayer(player.Id, { Position: e.target.value as Position })}>
-                    <option value="F">F</option>
-                    <option value="D">D</option>
-                    <option value="B">F/D</option>
-                  </select>
-                </td>
-                <td><input type="checkbox" checked={player.IsReidar} onChange={(e) => updatePlayer(player.Id, { IsReidar: e.target.checked })} /></td>
-                <td><input type="checkbox" checked={player.IsPermaWhite} onChange={(e) => updatePlayer(player.Id, { IsPermaWhite: e.target.checked })} /></td>
-                {RatingKeys.map(key => (
-                  <td key={key}>
-                    <select value={player.Ratings[key]} onChange={(e) => updateRating(player, key, Number(e.target.value))}>
-                      {[1, 2, 3].map(value => <option key={value} value={value}>{value}</option>)}
-                    </select>
-                  </td>
-                ))}
-                <td><button onClick={() => handleRemoveClick(player)}>X</button></td>
+      <main className="admin">
+        <p className="hint">
+          {players.length} pelaajaa. Taidot 1-3. Muut nimet ovat muotoja, joilla pelaaja näkyy Nimenhuudossa, pilkulla erotettuna.
+        </p>
+        <div className="admin-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Nimi</th>
+                <th>Muut nimet</th>
+                <th>Paikka</th>
+                <th>Reidar</th>
+                <th title="Pelaa aina valkoisissa">Aina valk.</th>
+                {RatingKeys.map(key => <th key={key}>{RatingText[key]}</th>)}
+                <th><span className="visually-hidden">Poista</span></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {visiblePlayers.map(player => (
+                <tr key={player.Id}>
+                  <th><input type="text" value={player.Name} placeholder="Nimi" aria-label="Nimi" onChange={(e) => updatePlayer(player.Id, { Name: e.target.value })} /></th>
+                  <td>
+                    <input
+                      type="text"
+                      aria-label="Muut nimet"
+                      defaultValue={player.Aliases.join(", ")}
+                      onBlur={(e) => updatePlayer(player.Id, { Aliases: e.target.value.split(",").map(alias => alias.trim()).filter(alias => alias !== "") })}
+                    />
+                  </td>
+                  <td>
+                    <div className="segmented small">
+                      {(["F", "D", "B"] as Position[]).map(position => (
+                        <button key={position} type="button" aria-pressed={player.Position === position} onClick={() => updatePlayer(player.Id, { Position: position })}>{position === "B" ? "F/D" : position}</button>
+                      ))}
+                    </div>
+                  </td>
+                  <td><input type="checkbox" aria-label="Reidar" checked={player.IsReidar} onChange={(e) => updatePlayer(player.Id, { IsReidar: e.target.checked })} /></td>
+                  <td><input type="checkbox" aria-label="Aina valkoisissa" checked={player.IsPermaWhite} onChange={(e) => updatePlayer(player.Id, { IsPermaWhite: e.target.checked })} /></td>
+                  {RatingKeys.map(key => (
+                    <td key={key}>
+                      <div className="segmented small" aria-label={RatingText[key]}>
+                        {[1, 2, 3].map(value => (
+                          <button key={value} type="button" aria-pressed={player.Ratings[key] === value} onClick={() => updateRating(player, key, value)}>{value}</button>
+                        ))}
+                      </div>
+                    </td>
+                  ))}
+                  <td><button type="button" className="ghost" aria-label={`Poista ${player.Name}`} onClick={() => handleRemoveClick(player)}>Poista</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
     </div>
   );
 }

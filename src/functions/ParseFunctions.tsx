@@ -29,9 +29,13 @@ const IsInitial = (Token: string) => /^\p{Lu}\p{Ll}?\.?$/u.test(Token);
 const IsLowercaseWord = (Token: string) => /^\p{Ll}/u.test(Token);
 
 // "H" or "Ra" in a profile matches "Hyötylä" or "Rantanen" in the paste, and the other way round.
-const TokensMatchByInitial = (AliasToken: string, PastedToken: string) => {
+// A pasted first name is never read as a surname, so "Tuomas V" doesn't swallow the next player "Ville".
+const TokensMatchByInitial = (AliasToken: string, PastedToken: string, KnownFirstNames: Set<string>) => {
     if (AliasToken === PastedToken) {
         return true;
+    }
+    if (PastedToken.length > AliasToken.length && KnownFirstNames.has(PastedToken)) {
+        return false;
     }
     const shorter = AliasToken.length < PastedToken.length ? AliasToken : PastedToken;
     const longer = shorter === AliasToken ? PastedToken : AliasToken;
@@ -51,7 +55,7 @@ const BuildAliasIndex = (Players: Player[]) => {
     return index;
 };
 
-const FindAliasMatch = (Index: AliasEntry[], Tokens: string[], Start: number) => {
+const FindAliasMatch = (Index: AliasEntry[], Tokens: string[], Start: number, KnownFirstNames: Set<string>) => {
     let best: { PlayerId: string; Length: number; Match: MatchType } | null = null;
 
     Index.forEach(function (alias) {
@@ -67,7 +71,7 @@ const FindAliasMatch = (Index: AliasEntry[], Tokens: string[], Start: number) =>
         if (pasted.every((token, i) => token === alias.Tokens[i])) {
             match = "exact";
         }
-        else if (length > 1 && pasted.every((token, i) => i < length - 1 ? token === alias.Tokens[i] : TokensMatchByInitial(alias.Tokens[i], token))) {
+        else if (length > 1 && pasted.every((token, i) => i < length - 1 ? token === alias.Tokens[i] : TokensMatchByInitial(alias.Tokens[i], token, KnownFirstNames))) {
             match = "initial";
         }
         if (match === null) {
@@ -90,7 +94,7 @@ const GuessNameLength = (Tokens: string[], Start: number, Index: AliasEntry[], K
     while (Start + length < Tokens.length && length < 3) {
         const token = Tokens[Start + length];
         const normalized = NormalizeToken(token);
-        if (GoalieMarker.test(token) || FindAliasMatch(Index, Tokens, Start + length)?.Match === "exact") {
+        if (GoalieMarker.test(token) || FindAliasMatch(Index, Tokens, Start + length, KnownFirstNames)?.Match === "exact") {
             break;
         }
         if (IsInitial(token) || IsLowercaseWord(token)) {
@@ -133,7 +137,7 @@ export const ParseSignups = (Text: string, Players: Player[]) => {
                 continue;
             }
 
-            const aliasMatch = FindAliasMatch(index, tokens, i);
+            const aliasMatch = FindAliasMatch(index, tokens, i, knownFirstNames);
             if (aliasMatch !== null) {
                 entries.push({
                     IsGoalie: false,
