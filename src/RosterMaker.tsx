@@ -8,6 +8,7 @@ import { BuildSignups, SignupKey } from './functions/SignupFunctions';
 import { GenerateRoster, GetTeamStats } from './functions/RosterFunctions';
 import { FormatCriteriaText, FormatRostersText, PositionLabel } from './functions/TextFunctions';
 import { LoadStored, SaveStored } from './functions/StorageFunctions';
+import Header from './Header';
 
 const PositionText: Record<Position, string> = { F: "F", D: "D", B: "F/D" };
 // Line-up order on the team cards: defense first, then two-way players, then forwards.
@@ -180,10 +181,7 @@ function RosterMaker() {
 
   return (
     <div className="page" onKeyDown={handleKeyDown}>
-      <header className="topbar">
-        <h1>Torstai<span>Roster</span></h1>
-        <a href="#admin">Ylläpito</a>
-      </header>
+        <Header LinkHref="#admin" LinkText="Ylläpito" />
 
       <main className="layout">
         <section className="panel">

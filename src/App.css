@@ -1,55 +1,25 @@
-/* Rink look: ice-white surfaces, red center line as the accent, blue line for selection.
+/* Club look from reidarshockey.com: white page, royal blue band with black and white
+   stripes, navy links and buttons, Poppins with heavy titles. Light only, like the club site.
    Two panels side by side on wide screens (sign-ups | rosters), stacked on phones. */
 :root {
-    --ice: #eef3f6;
+    --page: #ffffff;
+    --panel: #f0f0f0;
     --surface: #ffffff;
-    --ink: #0e1a22;
-    --muted: #5a6b76;
-    --line: #d3dde3;
-    --red: #c8102e;
-    --blue: #1d4f9c;
-    --blue-soft: #e3ecf8;
-    --amber: #a86400;
+    --ink: #222222;
+    --heading: #333333;
+    --muted: #606060;
+    --line: #d4d6d9;
+    --navy: #003366;
+    --navy-hover: #004d9a;
+    --royal: #002fa3;
+    --sky: #cde6ff;
+    --black: #000000;
+    --amber: #8a5200;
     --amber-soft: #fff1d6;
-    --jersey-black: #111417;
-    --jersey-white: #ffffff;
-    --font-display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
-    --font-body: "Saira", "Segoe UI", system-ui, sans-serif;
+    --error: #b3001b;
+    --radius: 0.375rem;
+    --font-body: "Poppins", "Segoe UI", system-ui, sans-serif;
     color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        --ice: #0b1217;
-        --surface: #131d24;
-        --ink: #e5edf1;
-        --muted: #8d9ea8;
-        --line: #26343d;
-        --red: #ff4d61;
-        --blue: #7aa5ff;
-        --blue-soft: #1b2a44;
-        --amber: #f0b453;
-        --amber-soft: #3a2c12;
-        --jersey-black: #000000;
-        --jersey-white: #f4f6f7;
-        color-scheme: dark;
-    }
-}
-
-:root[data-theme="dark"] {
-    --ice: #0b1217;
-    --surface: #131d24;
-    --ink: #e5edf1;
-    --muted: #8d9ea8;
-    --line: #26343d;
-    --red: #ff4d61;
-    --blue: #7aa5ff;
-    --blue-soft: #1b2a44;
-    --amber: #f0b453;
-    --amber-soft: #3a2c12;
-    --jersey-black: #000000;
-    --jersey-white: #f4f6f7;
-    color-scheme: dark;
 }
 
 * {
@@ -57,7 +27,7 @@
 }
 
 body {
-    background: var(--ice);
+    background: var(--page);
     color: var(--ink);
     font-family: var(--font-body);
     font-size: 15px;
@@ -76,7 +46,7 @@ textarea {
 button {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius);
     cursor: pointer;
     padding: 6px 12px;
 }
@@ -91,7 +61,7 @@ button[disabled] {
 }
 
 :focus-visible {
-    outline: 2px solid var(--blue);
+    outline: 2px solid var(--navy-hover);
     outline-offset: 2px;
 }
 
@@ -102,12 +72,17 @@ select,
 textarea {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius);
     padding: 6px 8px;
 }
 
 a {
-    color: var(--blue);
+    color: var(--navy);
+}
+
+a:hover,
+a:focus {
+    color: var(--navy-hover);
 }
 
 .visually-hidden {
@@ -120,33 +95,123 @@ a {
 
 /* ---------- Page frame ---------- */
 
-.topbar {
+/* The skewed cutouts poke past the right edge; clip keeps the page from scrolling sideways. */
+.page {
+    overflow-x: clip;
+}
+
+.band {
     align-items: center;
-    background: var(--surface);
-    border-bottom: 3px solid var(--red);
+    background: var(--royal);
     display: flex;
-    justify-content: space-between;
-    padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+    gap: 16px;
+    margin-top: 20px;
+    min-height: 68px;
+    padding: 0 max(28px, env(safe-area-inset-right, 0px)) 0 max(124px, calc(env(safe-area-inset-left, 0px) + 108px));
+    position: relative;
 }
 
-.topbar h1 {
-    font-family: var(--font-display);
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: .02em;
-    line-height: 1;
+/* Black stripe with a white edge, top and bottom, like the club site's menu band. */
+.band::before,
+.band::after {
+    background: var(--black);
+    content: "";
+    height: 6px;
+    left: 0;
+    position: absolute;
+    right: 0;
+}
+
+.band::before {
+    border-bottom: 4px solid var(--page);
+    top: 0;
+}
+
+.band::after {
+    border-top: 4px solid var(--page);
+    bottom: 0;
+}
+
+.band-cutout {
+    background: var(--page);
+    bottom: 0;
+    position: absolute;
+    top: 0;
+    width: 20px;
+    z-index: 1;
+}
+
+.band-cutout-left {
+    left: 0;
+    transform: skewX(10deg);
+    transform-origin: left bottom;
+}
+
+.band-cutout-right {
+    right: 0;
+    transform: skewX(-10deg);
+    transform-origin: right bottom;
+}
+
+.band-logo {
+    left: max(4px, env(safe-area-inset-left, 0px));
+    position: absolute;
+    top: -14px;
+    width: 104px;
+    z-index: 2;
+}
+
+.band-logo img {
+    display: block;
+    height: auto;
+    width: 100%;
+}
+
+.band h1 {
+    color: #ffffff;
+    flex: 1 1 auto;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
     margin: 0;
-    text-transform: uppercase;
+    padding: 18px 0;
+    text-shadow: 2px 2px 0 var(--black);
 }
 
-.topbar h1 span {
-    color: var(--red);
-    margin-left: .25em;
-}
-
-.topbar a {
-    font-weight: 600;
+.band-link {
+    color: #ffffff;
+    font-weight: 700;
+    position: relative;
     text-decoration: none;
+    text-shadow: 2px 2px 0 var(--black);
+    z-index: 2;
+}
+
+.band-link:hover,
+.band-link:focus {
+    color: var(--sky);
+}
+
+@media (min-width: 768px) {
+    .band {
+        min-height: 92px;
+        padding-left: max(190px, calc(env(safe-area-inset-left, 0px) + 170px));
+    }
+
+    .band::before,
+    .band::after {
+        height: 10px;
+    }
+
+    .band-logo {
+        top: -16px;
+        width: 168px;
+    }
+
+    .band h1 {
+        font-size: 32px;
+    }
 }
 
 .layout {
@@ -165,9 +230,8 @@ a {
 }
 
 .panel {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 10px;
+    background: var(--panel);
+    border-radius: var(--radius);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -178,21 +242,23 @@ a {
 .panel-head {
     align-items: baseline;
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     justify-content: space-between;
 }
 
 h2 {
-    font-family: var(--font-display);
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: .03em;
+    color: var(--heading);
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
     margin: 0;
-    text-transform: uppercase;
 }
 
 .tally {
     color: var(--muted);
+    white-space: nowrap;
     font-variant-numeric: tabular-nums;
     font-weight: 600;
 }
@@ -201,7 +267,7 @@ h2 {
 .field > span {
     color: var(--muted);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: .06em;
     text-transform: uppercase;
 }
@@ -226,7 +292,7 @@ h2 {
 }
 
 .error {
-    color: var(--red);
+    color: var(--error);
     font-weight: 600;
     margin: 0;
 }
@@ -263,7 +329,7 @@ h2 {
 }
 
 .chip-pos {
-    background: var(--ice);
+    background: var(--panel);
     border-radius: 999px;
     color: var(--muted);
     font-size: 11px;
@@ -304,15 +370,16 @@ h2 {
 }
 
 .chip[aria-pressed="true"] {
-    background: var(--blue-soft);
-    border-color: var(--blue);
+    background: var(--sky);
+    border-color: var(--navy);
     border-style: solid;
     color: var(--ink);
 }
 
 .editor {
-    background: var(--ice);
-    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -360,9 +427,9 @@ h2 {
 }
 
 button[aria-pressed="true"] {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: var(--surface);
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #ffffff;
 }
 
 .segmented {
@@ -376,12 +443,12 @@ button[aria-pressed="true"] {
 }
 
 .segmented button:first-child {
-    border-radius: 6px 0 0 6px;
+    border-radius: var(--radius) 0 0 var(--radius);
     margin-left: 0;
 }
 
 .segmented button:last-child {
-    border-radius: 0 6px 6px 0;
+    border-radius: 0 var(--radius) var(--radius) 0;
 }
 
 .segmented.small button {
@@ -394,28 +461,29 @@ button[aria-pressed="true"] {
 
 .generate {
     align-items: center;
-    background: var(--red);
+    background: var(--royal);
     border: none;
     color: #ffffff;
     display: flex;
-    font-family: var(--font-display);
-    font-size: 22px;
-    font-weight: 800;
+    font-size: 20px;
+    font-weight: 900;
     gap: 12px;
     justify-content: center;
-    letter-spacing: .05em;
-    padding: 12px;
+    letter-spacing: .02em;
+    padding: 14px;
+    text-shadow: 2px 2px 0 var(--black);
     text-transform: uppercase;
 }
 
 .generate:hover:not([disabled]) {
-    filter: brightness(1.08);
+    background: var(--navy-hover);
 }
 
 .generate kbd {
     font-family: var(--font-body);
     font-size: 11px;
     font-weight: 500;
+    text-shadow: none;
     letter-spacing: 0;
     opacity: .75;
     text-transform: none;
@@ -429,7 +497,7 @@ button[aria-pressed="true"] {
 
 .stale {
     background: var(--amber-soft);
-    border-radius: 6px;
+    border-radius: var(--radius);
     color: var(--amber);
     font-weight: 600;
     margin: 0;
@@ -443,8 +511,9 @@ button[aria-pressed="true"] {
 }
 
 .team {
-    border: 1px solid var(--line);
-    border-radius: 10px;
+    background: var(--surface);
+    border: 2px solid var(--black);
+    border-radius: var(--radius);
     min-width: 0;
     overflow: hidden;
 }
@@ -457,30 +526,28 @@ button[aria-pressed="true"] {
 }
 
 .team-black header {
-    background: var(--jersey-black);
+    background: var(--black);
     color: #ffffff;
 }
 
 .team-white header {
-    background: var(--jersey-white);
-    border-bottom: 1px solid var(--line);
-    color: #111417;
+    background: #ffffff;
+    border-bottom: 2px solid var(--black);
+    color: var(--black);
 }
 
 .team h3 {
-    font-family: var(--font-display);
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: .06em;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: .02em;
     margin: 0;
     text-transform: uppercase;
 }
 
 .team-count {
-    font-family: var(--font-display);
-    font-size: 28px;
+    font-size: 24px;
     font-variant-numeric: tabular-nums;
-    font-weight: 800;
+    font-weight: 900;
 }
 
 .team-stats {
@@ -568,8 +635,8 @@ button[aria-pressed="true"] {
 }
 
 .admin-bar .save:not([disabled]) {
-    background: var(--red);
-    border-color: var(--red);
+    background: var(--royal);
+    border-color: var(--royal);
     color: #ffffff;
     font-weight: 600;
 }
@@ -597,7 +664,7 @@ button[aria-pressed="true"] {
 .admin-table {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: var(--radius);
     overflow-x: auto;
 }
 

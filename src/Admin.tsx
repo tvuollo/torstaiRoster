@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Player, Position, RatingKey, RatingKeys } from './types/Player';
 import { FetchIsAdmin, FetchPlayers, Login, Logout, SavePlayers } from './functions/ApiFunctions';
+import Header from './Header';
 
 const RatingText: Record<RatingKey, string> = {
   Offense: "Hyökkäys",
@@ -99,10 +100,7 @@ function Admin() {
   if (!isAdmin) {
     return (
       <div className="page">
-        <header className="topbar">
-          <h1>Torstai<span>Roster</span></h1>
-          <a href="#">Rosterit</a>
-        </header>
+        <Header LinkHref="#" LinkText="Rosterit" />
         <main className="login">
           <form className="panel" onSubmit={handleLogin}>
             <h2>Ylläpito</h2>
@@ -118,10 +116,7 @@ function Admin() {
 
   return (
     <div className="page">
-      <header className="topbar">
-        <h1>Torstai<span>Roster</span></h1>
-        <a href="#">Rosterit</a>
-      </header>
+        <Header LinkHref="#" LinkText="Rosterit" />
       <div className="admin-bar">
         <input id="search" type="search" placeholder="Etsi pelaajaa" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Etsi pelaajaa" />
         <button type="button" onClick={() => handleAddClick()}>Lisää pelaaja</button>
