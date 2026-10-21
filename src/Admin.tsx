@@ -1,6 +1,7 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { Player, Position, RatingKey, RatingKeys } from './types/Player';
-import { FetchIsAdmin, FetchPlayers, Login, Logout, SavePlayers } from './functions/ApiFunctions';
+import { FetchIsAdmin, FetchPlayers, IsBrowserStorage, Login, Logout, SavePlayers } from './functions/ApiFunctions';
+import { CleanPlayers } from './functions/PlayerFunctions';
 import Header from './Header';
 
 const RatingText: Record<RatingKey, string> = {
@@ -81,6 +82,33 @@ function Admin() {
     setIsDirty(true);
   };
 
+  // Downloads the list as players.json, the same file the PHP server keeps in api/data/.
+  const handleExportClick = () => {
+    const blob = new Blob([JSON.stringify(players, null, 2) + "\n"], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "players.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportChange = (Event: ChangeEvent<HTMLInputElement>) => {
+    const file = Event.target.files?.[0];
+    Event.target.value = "";
+    if (file === undefined) {
+      return;
+    }
+    file.text()
+      .then(text => {
+        const imported = CleanPlayers(JSON.parse(text));
+        setPlayers(imported);
+        setIsDirty(true);
+        setMessage(`${imported.length} pelaajaa tuotu. Tallenna, niin ne jäävät voimaan.`);
+      })
+      .catch((error: Error) => setMessage(`Tuonti epäonnistui: ${error.message}`));
+  };
+
   const handleSaveClick = () => {
     setMessage("Tallennetaan...");
     SavePlayers(players)
@@ -121,10 +149,18 @@ function Admin() {
         <input id="search" type="search" placeholder="Etsi pelaajaa" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Etsi pelaajaa" />
         <button type="button" onClick={() => handleAddClick()}>Lisää pelaaja</button>
         <button type="button" className="save" disabled={!isDirty} onClick={() => handleSaveClick()}>Tallenna</button>
-        <span className={isDirty ? "status status-dirty" : "status"}>{isDirty ? "Tallentamattomia muutoksia" : message}</span>
-        <button type="button" className="ghost" onClick={() => handleLogout()}>Kirjaudu ulos</button>
+        <span className={isDirty ? "status status-dirty" : "status"}>{message !== "" ? message : isDirty ? "Tallentamattomia muutoksia" : ""}</span>
+        <button type="button" onClick={() => handleExportClick()}>Vie tiedostoon</button>
+        <label className="file-button">
+          Tuo tiedostosta
+          <input type="file" accept="application/json,.json" onChange={handleImportChange} />
+        </label>
+        {!IsBrowserStorage && <button type="button" className="ghost" onClick={() => handleLogout()}>Kirjaudu ulos</button>}
       </div>
       <main className="admin">
+        {IsBrowserStorage && (
+          <p className="stale">Testiversio: muutokset tallentuvat vain tähän selaimeen. Vie tiedostoon ennen siirtoa oikealle palvelimelle.</p>
+        )}
         <p className="hint">
           {players.length} pelaajaa. Taidot 1-3. Muut nimet ovat muotoja, joilla pelaaja näkyy Nimenhuudossa, pilkulla erotettuna.
         </p>

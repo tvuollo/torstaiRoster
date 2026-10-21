@@ -641,6 +641,26 @@ button[aria-pressed="true"] {
     font-weight: 600;
 }
 
+.file-button {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    padding: 6px 12px;
+}
+
+.file-button:focus-within {
+    outline: 2px solid var(--navy-hover);
+    outline-offset: 2px;
+}
+
+.file-button input {
+    height: 1px;
+    opacity: 0;
+    position: absolute;
+    width: 1px;
+}
+
 .status {
     color: var(--muted);
     flex: 1 1 auto;

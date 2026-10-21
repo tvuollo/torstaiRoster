@@ -26,6 +26,19 @@ npm test
 
 For local admin login, create `public/api/config.php` as described below (it is gitignored).
 
+## Test version on GitHub Pages
+
+`.github/workflows/pages.yml` publishes a build without PHP to GitHub Pages on every push to `main`
+(or by hand from the Actions tab). In that build the admin has no login and players are saved in
+the browser only, so it is for trying things out, not for sharing ratings.
+To use it, set **Settings → Pages → Source** to **GitHub Actions**. Pages on a free account needs a public repo.
+
+To move the ratings to the real server, press **Vie tiedostoon** in the Pages admin to download
+`players.json`. Then either press **Tuo tiedostosta** in the server's admin and **Tallenna**, or upload the
+file to `api/data/players.json` on the server.
+
+The same build can be made locally with `VITE_STORAGE=browser npm run build`.
+
 ## Deploying
 
 Needs a web server with PHP 7.4+.
