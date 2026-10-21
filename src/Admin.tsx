@@ -59,16 +59,12 @@ function Admin() {
   };
 
   const handleAddClick = () => {
-    const name = window.prompt("Pelaajan nimi (kuten Nimenhuudossa)");
-    if (!name || name.trim() === "") {
-      return;
-    }
     const newPlayer: Player = {
       Aliases: [],
-      Id: MakeId(name.trim(), players),
+      Id: MakeId(`uusi-${Date.now()}`, players),
       IsPermaWhite: false,
       IsReidar: false,
-      Name: name.trim(),
+      Name: "",
       Position: "F",
       Ratings: { Offense: 2, Defense: 2, Speed: 2, Skill: 2, Grit: 2 }
     };
@@ -76,11 +72,10 @@ function Admin() {
     setIsDirty(true);
   };
 
+  // Removal only takes effect on save, so no confirmation step is needed.
   const handleRemoveClick = (Player: Player) => {
-    if (window.confirm(`Poistetaanko ${Player.Name}?`)) {
-      setPlayers(players.filter(player => player.Id !== Player.Id));
-      setIsDirty(true);
-    }
+    setPlayers(players.filter(player => player.Id !== Player.Id));
+    setIsDirty(true);
   };
 
   const handleSaveClick = () => {
@@ -135,7 +130,7 @@ function Admin() {
           <tbody>
             {players.map(player => (
               <tr key={player.Id}>
-                <th><input type="text" value={player.Name} onChange={(e) => updatePlayer(player.Id, { Name: e.target.value })} /></th>
+                <th><input type="text" value={player.Name} placeholder="Nimi kuten Nimenhuudossa" onChange={(e) => updatePlayer(player.Id, { Name: e.target.value })} /></th>
                 <td>
                   <input
                     type="text"
