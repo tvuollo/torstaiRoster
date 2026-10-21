@@ -128,3 +128,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Admin password and saved player data live only on the server
+public/api/config.php
+public/api/data/players.json
+public/api/data/players.previous.json
+public/api/data/*.tmp

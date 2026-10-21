@@ -1,5 +1,5 @@
+export type ReidarMode = "ignore" | "even" | "black";
+
 export interface Criteria {
-    Licenses: boolean;
-    Ogs: boolean;
-    Reidars: boolean;
+    ReidarMode: ReidarMode;
 }

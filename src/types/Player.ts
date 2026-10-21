@@ -1,12 +1,19 @@
+export type Position = "F" | "D" | "B";
+
+export const RatingKeys = ["Offense", "Defense", "Speed", "Skill", "Grit"] as const;
+export type RatingKey = typeof RatingKeys[number];
+export type Ratings = Record<RatingKey, number>;
+
 export interface Player {
-    IsDefenseman: boolean;
-    IsLicenseReidar: boolean;
-    IsOriginalReidar: boolean;
+    Aliases: string[];
+    Id: string;
     IsPermaWhite: boolean;
     IsReidar: boolean;
     Name: string;
+    Position: Position;
+    Ratings: Ratings;
 }
 
-export interface PlayerWithId extends Player {
-    Id: string;
+export interface SignedUpPlayer extends Player {
+    IsGuest: boolean;
 }

@@ -1,6 +1,6 @@
-import { PlayerWithId } from "./Player"
+import { SignedUpPlayer } from "./Player"
 
 export interface Rosters {
-    Black: PlayerWithId[],
-    White: PlayerWithId[]
+    Black: SignedUpPlayer[],
+    White: SignedUpPlayer[]
 };
