@@ -12,7 +12,7 @@ import Header from './Header';
 
 const PositionText: Record<Position, string> = { F: "F", D: "D" };
 const RatingText: Record<RatingKey | "Overall", string> = {
-  Overall: "Yleisarvo",
+  Overall: "Overall",
   Offense: "Hyökkäys",
   Defense: "Puolustus",
   Speed: "Nopeus",
