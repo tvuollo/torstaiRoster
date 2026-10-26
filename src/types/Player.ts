@@ -1,4 +1,4 @@
-export type Position = "F" | "D" | "B";
+export type Position = "F" | "D";
 
 export const RatingKeys = ["Offense", "Defense", "Speed", "Skill", "Grit"] as const;
 export type RatingKey = typeof RatingKeys[number];

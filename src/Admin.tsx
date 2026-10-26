@@ -191,8 +191,8 @@ function Admin() {
                   </td>
                   <td>
                     <div className="segmented small">
-                      {(["F", "D", "B"] as Position[]).map(position => (
-                        <button key={position} type="button" aria-pressed={player.Position === position} onClick={() => updatePlayer(player.Id, { Position: position })}>{position === "B" ? "F/D" : position}</button>
+                      {(["F", "D"] as Position[]).map(position => (
+                        <button key={position} type="button" aria-pressed={player.Position === position} onClick={() => updatePlayer(player.Id, { Position: position })}>{position}</button>
                       ))}
                     </div>
                   </td>

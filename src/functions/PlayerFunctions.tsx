@@ -1,6 +1,6 @@
 import { Player, Position, RatingKeys, Ratings } from "../types/Player";
 
-const Positions: Position[] = ["F", "D", "B"];
+const Positions: Position[] = ["F", "D"];
 
 const CleanRating = (Value: unknown) => Math.max(1, Math.min(3, Math.round(Number(Value) || 2)));
 

@@ -1,18 +1,24 @@
 import { KeyboardEvent, useEffect, useMemo, useState } from 'react';
 import { ReidarMode } from './types/Criteria';
-import { Player, Position, SignedUpPlayer } from './types/Player';
+import { Player, Position, RatingKey, RatingKeys, SignedUpPlayer } from './types/Player';
 import { Rosters } from './types/Rosters';
 import { EmptyCorrections, Signup, SignupCorrections, SignupOverride } from './types/Signup';
 import { FetchPlayers } from './functions/ApiFunctions';
 import { BuildSignups, SignupKey } from './functions/SignupFunctions';
-import { GenerateRoster, GetTeamStats } from './functions/RosterFunctions';
-import { FormatCriteriaText, FormatRostersText, PositionLabel } from './functions/TextFunctions';
+import { GenerateRoster, GetTeamRatings, GetTeamStats } from './functions/RosterFunctions';
+import { FormatCriteriaText, FormatRostersText } from './functions/TextFunctions';
 import { LoadStored, SaveStored } from './functions/StorageFunctions';
 import Header from './Header';
 
-const PositionText: Record<Position, string> = { F: "F", D: "D", B: "F/D" };
-// Line-up order on the team cards: defense first, then two-way players, then forwards.
-const PositionOrder: Record<Position, number> = { D: 0, B: 1, F: 2 };
+const PositionText: Record<Position, string> = { F: "F", D: "D" };
+const RatingText: Record<RatingKey | "Overall", string> = {
+  Overall: "Yleisarvo",
+  Offense: "Hyökkäys",
+  Defense: "Puolustus",
+  Speed: "Nopeus",
+  Skill: "Taito",
+  Grit: "Sisu"
+};
 const LevelText: Record<number, string> = { 1: "Aloittelija", 2: "Perus", 3: "Kova" };
 const ReidarModes: { Mode: ReidarMode, Label: string }[] = [
   { Mode: "ignore", Label: "Ei väliä" },
@@ -20,8 +26,11 @@ const ReidarModes: { Mode: ReidarMode, Label: string }[] = [
   { Mode: "black", Label: "Kaikki mustiin" }
 ];
 
+const ReidarBadge = () => <img className="reidar-badge" src="logo480.png" alt="Reidar" title="Reidar" width={20} height={14} />;
+
 interface Result {
   Comment: string;
+  IsEdited: boolean;
   Goalies: string[];
   Rosters: Rosters;
   Signature: string;
@@ -112,6 +121,7 @@ function RosterMaker() {
     setCopyState("idle");
     setResult({
       Comment: FormatCriteriaText({ ReidarMode: reidarMode }),
+      IsEdited: false,
       Goalies: goalies.map(goalie => goalie.PlayerId !== null ? playerById.get(goalie.PlayerId)?.Name ?? goalie.Text : goalie.Text),
       Rosters: GenerateRoster({ ReidarMode: reidarMode }, pool),
       Signature: signature
@@ -146,6 +156,21 @@ function RosterMaker() {
     return PositionText[player?.Position ?? Signup.GuestPosition];
   };
 
+  const IsReidar = (Signup: Signup) => Signup.PlayerId !== null && playerById.get(Signup.PlayerId)?.IsReidar === true;
+
+  // Moves one player to the other team, for fine-tuning after the draw.
+  const handleMove = (Player: SignedUpPlayer) => {
+    if (result === null) {
+      return;
+    }
+    const fromBlack = result.Rosters.Black.some(player => player.Id === Player.Id);
+    const byName = (a: SignedUpPlayer, b: SignedUpPlayer) => a.Name.localeCompare(b.Name, "fi");
+    const black = fromBlack ? result.Rosters.Black.filter(player => player.Id !== Player.Id) : [...result.Rosters.Black, Player].sort(byName);
+    const white = fromBlack ? [...result.Rosters.White, Player].sort(byName) : result.Rosters.White.filter(player => player.Id !== Player.Id);
+    setCopyState("idle");
+    setResult({ ...result, IsEdited: true, Rosters: { Black: black, White: white } });
+  };
+
   const ChipKind = (Signup: Signup) => {
     if (Signup.IsGoalie) {
       return "goalie";
@@ -158,6 +183,7 @@ function RosterMaker() {
 
   const RenderTeam = (Title: string, Team: SignedUpPlayer[], Color: "black" | "white") => {
     const stats = GetTeamStats(Team);
+    const otherTeam = Color === "black" ? "valkoisiin" : "mustiin";
     return (
       <article className={`team team-${Color}`}>
         <header>
@@ -165,17 +191,44 @@ function RosterMaker() {
           <span className="team-count">{Team.length}</span>
         </header>
         <p className="team-stats">
-          {stats.Forwards} F · {stats.Defense} D{stats.Both > 0 ? ` · ${stats.Both} F/D` : ""} · {stats.Reidars} Reidaria
+          {stats.Forwards} F · {stats.Defense} D · {stats.Reidars} Reidaria
         </p>
         <ol>
-          {[...Team].sort((a, b) => PositionOrder[a.Position] - PositionOrder[b.Position] || a.Name.localeCompare(b.Name, "fi")).map(player => (
+          {Team.map(player => (
             <li key={player.Id}>
-              <span>{player.Name}{player.IsGuest && <em> vieras</em>}</span>
-              <span className="pos">{PositionLabel(player)}</span>
+              <span className="team-player">
+                {player.IsReidar && <ReidarBadge />}
+                {player.Name}
+                {player.IsGuest && <em>vieras</em>}
+              </span>
+              <button type="button" className="move" title={`Siirrä ${otherTeam}`} aria-label={`Siirrä ${player.Name} ${otherTeam}`} onClick={() => handleMove(player)}>
+                {Color === "black" ? "\u2192" : "\u2190"}
+              </button>
             </li>
           ))}
         </ol>
       </article>
+    );
+  };
+
+  // Black on the left, White on the right; the longer bar shows which team is stronger.
+  const RenderRatings = (Generated: Rosters) => {
+    const black = GetTeamRatings(Generated.Black);
+    const white = GetTeamRatings(Generated.White);
+    const keys: (RatingKey | "Overall")[] = ["Overall", ...RatingKeys];
+    const BarWidth = (Value: number) => `${Math.max(0, (Value - 40) / 59 * 100)}%`;
+    return (
+      <div className="ratings" aria-label="Joukkueiden vertailu">
+        {keys.map(key => (
+          <div key={key} className={key === "Overall" ? "rating rating-overall" : "rating"}>
+            <span className={black[key] > white[key] ? "rating-value lead" : "rating-value"}>{black[key]}</span>
+            <span className="rating-bar rating-bar-black"><span style={{ width: BarWidth(black[key]) }} /></span>
+            <span className="rating-label">{RatingText[key]}</span>
+            <span className="rating-bar rating-bar-white"><span style={{ width: BarWidth(white[key]) }} /></span>
+            <span className={white[key] > black[key] ? "rating-value lead" : "rating-value"}>{white[key]}</span>
+          </div>
+        ))}
+      </div>
     );
   };
 
@@ -212,12 +265,13 @@ function RosterMaker() {
                     <li key={signup.Key}>
                       <button
                         type="button"
-                        className={`chip chip-${kind}`}
+                        className={`chip chip-${kind}${IsReidar(signup) ? " chip-reidar" : ""}`}
                         aria-pressed={selected === key}
                         title={signup.Text}
                         onClick={() => setSelected(selected === key ? null : key)}
                       >
                         {kind === "unsure" && <span className="chip-flag">?</span>}
+                        {IsReidar(signup) && <ReidarBadge />}
                         <span>{ChipName(signup)}</span>
                         <span className="chip-pos">{kind === "goalie" ? "MV" : ChipPosition(signup)}</span>
                       </button>
@@ -228,6 +282,7 @@ function RosterMaker() {
               <p className="hint">
                 {guestCount > 0 && <span className="hint-guest">{guestCount} vierasta</span>}
                 {unsureCount > 0 && <span className="hint-unsure">{unsureCount} arvattu, tarkista</span>}
+                <span className="hint-reidar"><ReidarBadge /> Reidar</span>
                 <span>Napauta nimeä korjataksesi.</span>
               </p>
             </>
@@ -256,7 +311,7 @@ function RosterMaker() {
                   <div className="field">
                     <span>Paikka</span>
                     <div className="segmented">
-                      {(["F", "D", "B"] as Position[]).map(position => (
+                      {(["F", "D"] as Position[]).map(position => (
                         <button key={position} type="button" aria-pressed={selectedSignup.GuestPosition === position} onClick={() => setOverride(selectedSignup, { Position: position })}>{PositionText[position]}</button>
                       ))}
                     </div>
@@ -307,11 +362,12 @@ function RosterMaker() {
           {result !== null && (
             <>
               {result.Signature !== signature && <p className="stale">Lista on muuttunut. Arvo rosterit uudelleen.</p>}
+              {RenderRatings(result.Rosters)}
               <div className="teams">
                 {RenderTeam("Musta", result.Rosters.Black, "black")}
                 {RenderTeam("Valkoinen", result.Rosters.White, "white")}
               </div>
-              <p className="comment">{result.Comment}</p>
+              <p className="comment">{result.IsEdited ? "Joukkueita on muokattu käsin." : result.Comment} Siirrä pelaajaa toiseen joukkueeseen nuolesta.</p>
               {result.Goalies.length > 0 && <p className="goalies"><strong>MV</strong> {result.Goalies.join(", ")}</p>}
               <button type="button" className="copy" onClick={() => handleCopy()}>{copyState === "copied" ? "Kopioitu" : "Kopioi tekstinä"}</button>
               {copyState === "failed" && (
