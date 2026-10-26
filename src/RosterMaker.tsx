@@ -61,6 +61,8 @@ function RosterMaker() {
   const skaters = signups.filter(signup => !signup.IsGoalie);
   const goalies = signups.filter(signup => signup.IsGoalie);
   const guestCount = skaters.filter(signup => signup.PlayerId === null).length;
+  const reidarCount = skaters.filter(signup => signup.PlayerId !== null && playerById.get(signup.PlayerId)?.IsReidar === true).length;
+  const regularCount = skaters.length - guestCount - reidarCount;
   const unsureCount = signups.filter(signup => signup.Match === "firstname" || signup.Match === "initial").length;
   const selectedIndex = signups.findIndex(signup => SignupKey(signup.Text) === selected);
   const selectedSignup = selectedIndex >= 0 ? signups[selectedIndex] : null;
@@ -197,9 +199,9 @@ function RosterMaker() {
           {Team.map(player => (
             <li key={player.Id}>
               <span className="team-player">
-                {player.IsReidar && <ReidarBadge />}
+                {player.IsReidar ? <ReidarBadge /> : <span className="badge-placeholder" aria-hidden="true" />}
                 {player.Name}
-                {player.IsGuest && <em>vieras</em>}
+                {player.IsGuest ? <em>vieras</em> : !player.IsReidar && <em>vaki</em>}
               </span>
               <button type="button" className="move" title={`Siirrä ${otherTeam}`} aria-label={`Siirrä ${player.Name} ${otherTeam}`} onClick={() => handleMove(player)}>
                 {Color === "black" ? "\u2192" : "\u2190"}
@@ -280,9 +282,8 @@ function RosterMaker() {
                 })}
               </ul>
               <p className="hint">
-                {guestCount > 0 && <span className="hint-guest">{guestCount} vierasta</span>}
+                <span className="hint-counts"><ReidarBadge /> {reidarCount} Reidaria, {regularCount} vakivierasta, {guestCount} vierasta</span>
                 {unsureCount > 0 && <span className="hint-unsure">{unsureCount} arvattu, tarkista</span>}
-                <span className="hint-reidar"><ReidarBadge /> Reidar</span>
                 <span>Napauta nimeä korjataksesi.</span>
               </p>
             </>
