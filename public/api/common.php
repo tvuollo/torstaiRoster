@@ -106,7 +106,7 @@ function clean_players($input): array
             'Id' => mb_substr($id, 0, 100),
             'Name' => mb_substr($name, 0, 100),
             'Aliases' => $aliases,
-            'Position' => in_array($player['Position'] ?? '', ['F', 'D', 'B'], true) ? $player['Position'] : 'F',
+            'Position' => in_array($player['Position'] ?? '', ['F', 'D'], true) ? $player['Position'] : 'F',
             'IsReidar' => !empty($player['IsReidar']),
             'IsPermaWhite' => !empty($player['IsPermaWhite']),
             'Ratings' => [

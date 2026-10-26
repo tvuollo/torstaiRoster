@@ -1,4 +1,4 @@
-import { RatingKeys, SignedUpPlayer } from "../types/Player";
+import { RatingKey, RatingKeys, SignedUpPlayer } from "../types/Player";
 import { Criteria } from "../types/Criteria";
 import { Rosters } from "../types/Rosters";
 
@@ -11,7 +11,6 @@ const Restarts = 200;
 const CostTolerance = 1;
 
 export interface TeamStats {
-    Both: number;
     Defense: number;
     Forwards: number;
     Reidars: number;
@@ -25,11 +24,23 @@ const Shuffle = <T,>(Items: T[], Random: () => number) => Items
     .map(({ item }) => item);
 
 export const GetTeamStats = (Team: SignedUpPlayer[]): TeamStats => ({
-    Both: Team.filter(player => player.Position === "B").length,
     Defense: Team.filter(player => player.Position === "D").length,
     Forwards: Team.filter(player => player.Position === "F").length,
     Reidars: Team.filter(player => player.IsReidar).length
 });
+
+export type TeamRatings = Record<RatingKey | "Overall", number>;
+
+// Game-style team ratings: the team's average of each 1-3 rating on a 40-99 scale,
+// and Overall as the average of the five.
+export const GetTeamRatings = (Team: SignedUpPlayer[]): TeamRatings => {
+    const scaled = RatingKeys.map(key => {
+        const average = Team.length === 0 ? 1 : Team.reduce((sum, player) => sum + player.Ratings[key], 0) / Team.length;
+        return 40 + (average - 1) / 2 * 59;
+    });
+    const ratings = Object.fromEntries(RatingKeys.map((key, i) => [key, Math.round(scaled[i])]));
+    return { ...ratings, Overall: Math.round(scaled.reduce((sum, value) => sum + value, 0) / scaled.length) } as TeamRatings;
+};
 
 // IsBlack[i] tells which team Pool[i] is on.
 const GetCost = (Crit: Criteria, Pool: SignedUpPlayer[], IsBlack: boolean[], BlackSize: number) => {
@@ -45,8 +56,9 @@ const GetCost = (Crit: Criteria, Pool: SignedUpPlayer[], IsBlack: boolean[], Bla
             ratingDiff[key] = (ratingDiff[key] ?? 0) + sign * player.Ratings[key];
             totalDiff += sign * player.Ratings[key];
         });
-        // A player who plays both counts as half a defenseman.
-        defenseDiff += sign * (player.Position === "D" ? 1 : player.Position === "B" ? 0.5 : 0);
+        if (player.Position === "D") {
+            defenseDiff += sign;
+        }
         if (player.IsReidar && IsBlack[i]) {
             blackReidars++;
         }

@@ -40,12 +40,10 @@ export const FormatCriteriaText = (Crit: Criteria) => {
     return `Kaikki Reidarit ${PickOne(InsertVerbOptions)} mustille. ` + PickOne(TextAffixOptions);
 };
 
-export const PositionLabel = (Player: SignedUpPlayer) => Player.Position === "B" ? "F/D" : Player.Position;
-
 // Plain text for pasting into Nimenhuuto or WhatsApp.
 export const FormatRostersText = (Generated: Rosters, Goalies: string[]) => {
     const team = (Title: string, Players: SignedUpPlayer[]) =>
-        `${Title} (${Players.length})\n` + Players.map(player => `${player.Name} (${PositionLabel(player)})`).join("\n");
+        `${Title} (${Players.length})\n` + Players.map(player => player.Name).join("\n");
 
     let text = team("MUSTA", Generated.Black) + "\n\n" + team("VALKOINEN", Generated.White);
     if (Goalies.length > 0) {

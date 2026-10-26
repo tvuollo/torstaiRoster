@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { GenerateRoster, GetTeamStats } from "./RosterFunctions";
+import { GenerateRoster, GetTeamRatings, GetTeamStats } from "./RosterFunctions";
 import { ParseSignups } from "./ParseFunctions";
 import { Player, SignedUpPlayer } from "../types/Player";
 import Seed from "../../public/api/data/players.seed.json";
@@ -14,7 +14,7 @@ const SeededRandom = (Seed: number) => () => {
     return Seed / 4294967296;
 };
 
-const MakePlayer = (Name: string, Position: "F" | "D" | "B", Rating: number, IsReidar = false): SignedUpPlayer => ({
+const MakePlayer = (Name: string, Position: "F" | "D", Rating: number, IsReidar = false): SignedUpPlayer => ({
     Aliases: [],
     Id: Name,
     IsGuest: false,
@@ -61,7 +61,7 @@ describe("GenerateRoster", () => {
     const pool: SignedUpPlayer[] = [
         MakePlayer("D1", "D", 3), MakePlayer("D2", "D", 1), MakePlayer("D3", "D", 2), MakePlayer("D4", "D", 2),
         MakePlayer("F1", "F", 3, true), MakePlayer("F2", "F", 3, true), MakePlayer("F3", "F", 1, true), MakePlayer("F4", "F", 1),
-        MakePlayer("F5", "F", 2), MakePlayer("F6", "F", 2), MakePlayer("B1", "B", 3), MakePlayer("B2", "B", 1)
+        MakePlayer("F5", "F", 2), MakePlayer("F6", "F", 2), MakePlayer("F7", "F", 3), MakePlayer("F8", "F", 1)
     ];
     const total = (team: SignedUpPlayer[]) => team.reduce((sum, player) => sum + player.Ratings.Skill, 0);
 
@@ -72,7 +72,7 @@ describe("GenerateRoster", () => {
             expect(rosters.White).toHaveLength(6);
             const black = GetTeamStats(rosters.Black);
             const white = GetTeamStats(rosters.White);
-            expect(black.Defense + black.Both / 2).toBe(white.Defense + white.Both / 2);
+            expect(black.Defense).toBe(white.Defense);
             expect(total(rosters.Black)).toBe(total(rosters.White));
         }
     });
@@ -80,7 +80,7 @@ describe("GenerateRoster", () => {
     test("puts Reidars on black or splits them evenly", () => {
         const black = GenerateRoster({ ReidarMode: "black" }, pool, SeededRandom(1));
         expect(GetTeamStats(black.Black).Reidars).toBe(3);
-        const even = GenerateRoster({ ReidarMode: "even" }, [...pool, MakePlayer("F7", "F", 2, true)], SeededRandom(1));
+        const even = GenerateRoster({ ReidarMode: "even" }, [...pool, MakePlayer("F9", "F", 2, true)], SeededRandom(1));
         expect(GetTeamStats(even.Black).Reidars).toBe(2);
         expect(GetTeamStats(even.White).Reidars).toBe(2);
     });
@@ -99,5 +99,12 @@ describe("GenerateRoster", () => {
             splits.add(GenerateRoster({ ReidarMode: "ignore" }, pool, SeededRandom(seed)).Black.map(player => player.Name).join());
         }
         expect(splits.size).toBeGreaterThan(1);
+    });
+
+    test("rates teams on a 40-99 scale", () => {
+        const ratings = GetTeamRatings([MakePlayer("A", "F", 1), MakePlayer("B", "F", 3)]);
+        expect(ratings).toEqual({ Offense: 70, Defense: 70, Speed: 70, Skill: 70, Grit: 70, Overall: 70 });
+        expect(GetTeamRatings([MakePlayer("C", "D", 3)]).Overall).toBe(99);
+        expect(GetTeamRatings([MakePlayer("D", "D", 1)]).Overall).toBe(40);
     });
 });
